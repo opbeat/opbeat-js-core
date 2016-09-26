@@ -276,7 +276,7 @@ function sequenceSucceeded (done) {
 }
 
 gulp.task('test:unit:sauce', function (done) {
-  runSequence(['build', 'test:launchsauceconnect'], 'test', function (err) {
+  runSequence(['test:launchsauceconnect'], 'test', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
@@ -284,6 +284,5 @@ gulp.task('test:unit:sauce', function (done) {
     }
   })
 })
-
 
 gulp.task('default', taskListing)

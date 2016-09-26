@@ -54,10 +54,7 @@ module.exports = function (config) {
     ],
     files: [
       'test/utils/polyfill.js',
-      'node_modules/angular/angular.js',
-      'node_modules/angular-resource/angular-resource.js',
       'node_modules/zone.js/dist/zone.js',
-      'node_modules/angular-mocks/angular-mocks.js',
       specPattern,
       { pattern: 'test/exceptions/data/*.js', included: false, watched: false },
       { pattern: 'src/**/*.js', included: false, watched: true }
@@ -106,7 +103,6 @@ module.exports = function (config) {
   var version = require('./package').version
 
   console.log('MODE: ' + process.env.MODE)
-  console.log('Environment ANGULAR_VERSION: ' + process.env.ANGULAR_VERSION)
 
   if (isTravis) {
     buildId = 'OpbeatJS@' + version + ' - TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')'
