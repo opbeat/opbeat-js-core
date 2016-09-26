@@ -14,8 +14,6 @@ var derequire = require('gulp-derequire')
 var es = require('event-stream')
 var karma = require('karma')
 var runSequence = require('run-sequence')
-var webdriver = require('gulp-webdriver')
-var selenium = require('selenium-standalone')
 var replace = require('gulp-replace')
 
 var connect = require('gulp-connect')
@@ -24,7 +22,7 @@ require('gulp-release-tasks')(gulp)
 
 var jeditor = require('gulp-json-editor')
 
-var webdriverConfig = {
+var saucelabsConfig = {
   user: process.env.SAUCE_USERNAME || 'opbeat',
   key: process.env.SAUCE_ACCESS_KEY || 'de42e589-1450-41a2-8a44-90aa00c15168',
   host: process.env.SAUCE_HOST || 'ondemand.saucelabs.com',
@@ -217,75 +215,13 @@ gulp.task('test', function (done) {
   }, done).start()
 })
 
-gulp.task('test:e2e:protractor', function () {
-  var protractor = require('gulp-protractor').protractor
-
-  return gulp.src(['test/e2e/**/*.pspec.js'])
-    .pipe(protractor({
-      configFile: 'protractor.conf.js'
-    }))
-    .on('error', function (e) { throw e })
-})
-
-// Run end-to-end tests on the local machine using webdriver configuration
-gulp.task('test:e2e:run', ['test:e2e:protractor'], function (done) {
-  gulp.src('wdio.conf.js')
-    .pipe(webdriver())
-    .on('error', function () {
-      return process.exit(1)
-    })
-    .on('end', function () {
-      return process.exit(0)
-    })
-})
-
-gulp.task('test:e2e:phantomjs', function () {
-  var failSafeStream = gulp.src('wdio.phantomjs.conf.js')
-    .pipe(webdriver())
-    .on('error', function () {
-      console.log('Exiting process with status 1')
-      process.exit(1)
-    })
-    .on('end', function () {
-      console.log('Tests complete')
-    })
-  return failSafeStream
-})
-
-gulp.task('test:e2e:sauceconnect:failsafe', function () {
-  var failSafeStream = gulp.src('wdio.failsafe.conf.js')
-    .pipe(webdriver(webdriverConfig))
-    .on('error', function () {
-      console.log('Exiting process with status 1')
-      process.exit(1)
-    })
-    .on('end', function () {
-      console.log('Tests complete')
-    })
-  return failSafeStream
-})
-
-// Run end-to-end tests remotely in saucelabs using webdriver configuration
-gulp.task('test:e2e:sauceconnect', ['test:e2e:sauceconnect:failsafe'], function () {
-  var e2eStream = gulp.src('wdio.sauce.conf.js')
-    .pipe(webdriver(webdriverConfig))
-    .on('error', function () {
-      console.log('Exiting process with status 1')
-      process.exit(1)
-    })
-    .on('end', function () {
-      console.log('Tests complete')
-    })
-  return e2eStream
-})
-
 // Launch sauce connect and connect
-gulp.task('test:e2e:launchsauceconnect', function (done) {
+gulp.task('test:launchsauceconnect', function (done) {
   var sauceConnectLauncher = require('sauce-connect-launcher')
 
   var config = {
-    username: webdriverConfig.user,
-    accessKey: webdriverConfig.key,
+    username: saucelabsConfig.user,
+    accessKey: saucelabsConfig.key,
     logger: console.log
   }
 
@@ -309,21 +245,6 @@ gulp.task('test:e2e:launchsauceconnect', function (done) {
   tryConnect(3, 1, done)
 })
 
-// Serve test application
-gulp.task('test:e2e:serve', function () {
-  return connect.server({
-    root: ['test/e2e', 'src', './'],
-    port: 8000,
-    livereload: false,
-    open: false,
-    middleware: function (connect, opt) {
-      var middlewares = []
-      middlewares.push(connect.favicon())
-      return middlewares
-    }
-  })
-})
-
 function onExit (callback) {
   function exitHandler (err) {
     try {
@@ -341,58 +262,6 @@ function onExit (callback) {
   process.on('uncaughtException', exitHandler)
 }
 
-function startSelenium (callback, manualStop) {
-  selenium.install({ logger: console.log }, function (installError) {
-    if (installError) {
-      console.log('Error while installing selenium:', installError)
-    }
-    selenium.start(function (startError, child) {
-      if (startError) {
-        console.log('Error while starting selenium:', startError)
-        return process.exit(1)
-      } else {
-        console.log('Selenium started!')
-        function killSelenium () {
-          child.kill()
-          console.log('Just killed selenium!')
-        }
-        if (manualStop) {
-          callback(killSelenium)
-        }else {
-          onExit(killSelenium)
-          callback()
-        }
-      }
-    })
-  })
-}
-
-// Install and start selenium
-gulp.task('test:e2e:selenium', function (done) {
-  startSelenium(function () {
-    done()
-  })
-})
-
-gulp.task('test:e2e:start-local', ['test:e2e:serve', 'test:e2e:selenium'])
-
-// Run all required tasks to perform remote end-to-end testing
-gulp.task('test:e2e:start-sauce', function (done) {
-  runSequence('build', 'test:e2e:launchsauceconnect', function () {
-    console.log('All tasks completed.')
-  })
-})
-
-gulp.task('test:e2e', function (done) {
-  runSequence(['build', 'build:release', 'test:e2e:start-local'], ['test:e2e:protractor', 'test:e2e:phantomjs', 'test:e2e:launchsauceconnect'], 'test:e2e:sauceconnect', function (err) {
-    if (err) {
-      return taskFailed(err)
-    } else {
-      return sequenceSucceeded(done)
-    }
-  })
-})
-
 function taskFailed (err) {
   var exitCode = 2
   console.log('[ERROR] gulp build task failed', err)
@@ -407,7 +276,7 @@ function sequenceSucceeded (done) {
 }
 
 gulp.task('test:unit:sauce', function (done) {
-  runSequence(['build', 'test:e2e:launchsauceconnect'], 'test', function (err) {
+  runSequence(['build', 'test:launchsauceconnect'], 'test', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
@@ -416,10 +285,5 @@ gulp.task('test:unit:sauce', function (done) {
   })
 })
 
-gulp.task('watch:e2e', ['e2e-serve', 'selenium-start'], function (done) {
-  gulp.watch(['test/e2e/**'], function () {
-    runSequence('test:e2e')
-  })
-})
 
 gulp.task('default', taskListing)
