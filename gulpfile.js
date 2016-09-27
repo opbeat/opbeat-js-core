@@ -119,11 +119,6 @@ gulp.task('build:release', function () {
 gulp.task('build', function () {
   var integrations = require('./release/integrations')
 
-  integrations['opbeat-angular.e2e'] = {
-    version: integrations['opbeat-angular'].version,
-    entry: './test/e2e/angular/opbeat-angular.e2e.js'
-  }
-
   var tasks = Object.keys(integrations).map(function (key) {
     var entry = integrations[key].entry
     var version = integrations[key].version
