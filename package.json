@@ -1,14 +1,14 @@
 {
-  "name": "opbeat-js",
-  "version": "3.1.4",
-  "description": "Official JS client for logging exceptions and stacktraces to Opbeat",
+  "name": "opbeat-js-core",
+  "version": "0.0.1",
+  "description": "Opbeat-js core",
   "license": "MIT",
-  "homepage": "https://github.com/opbeat/opbeat-js",
+  "homepage": "https://github.com/opbeat/opbeat-js-core",
   "contributors": [
     "Hamidreza Jahtalab",
     "Kenneth Auchenberg"
   ],
-  "main": "src/opbeat-js/opbeat.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "gulp build:release",
     "karma": "node node_modules/karma/bin/karma start --coverage",
@@ -16,11 +16,11 @@
   },
   "private": true,
   "files": [
-    "dist/*.js"
+    "src/**/*.js"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/opbeat/opbeat-js.git"
+    "url": "https://github.com/opbeat/opbeat-js-core.git"
   },
   "browser": {
     "zone.js": "./node_modules/zone.js/dist/zone.js"
