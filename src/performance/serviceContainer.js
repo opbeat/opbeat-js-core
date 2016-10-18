@@ -16,7 +16,7 @@ ServiceContainer.prototype.initialize = function () {
   var zoneService = this.services.zoneService
 
   var opbeatBackend = this.services.opbeatBackend = this.serviceFactory.getOpbeatBackend()
-  var transactionService = this.services.transactionService = new TransactionService(zoneService, this.services.logger, configService, opbeatBackend)
+  var transactionService = this.services.transactionService = this.services.transactionService = new TransactionService(zoneService, this.services.logger, configService, opbeatBackend)
   transactionService.scheduleTransactionSend()
 
   if (utils.isUndefined(window.opbeatApi)) {

@@ -68,7 +68,10 @@ ServiceFactory.prototype.getExceptionHandler = function () {
 }
 
 ServiceFactory.prototype.getPerformanceServiceContainer = function () {
-  return new PerformanceServiceContainer(this)
+  if (utils.isUndefined(this.services['PerformanceServiceContainer'])) {
+    this.services['PerformanceServiceContainer'] = new PerformanceServiceContainer(this)
+  }
+  return this.services['PerformanceServiceContainer']
 }
 
 module.exports = ServiceFactory
