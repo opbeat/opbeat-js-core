@@ -2,7 +2,7 @@ var Config = require('../../src/lib/config')
 var OpbeatBackend = require('../../src/backend/opbeat_backend')
 var logger = Object.create(require('loglevel'))
 
-var Transaction = require('../../src/transaction/transaction')
+var Transaction = require('../../src/performance/transaction')
 
 function TransportMock () {
   this.transportData = []

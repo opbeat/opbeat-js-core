@@ -1,5 +1,5 @@
-var ZoneService = require('../../src/transaction/zone_service')
-var ServiceContainer = require('../../src/common/serviceContainer')
+var ZoneService = require('../../src/performance/zoneService')
+var ServiceContainer = require('../../src/performance/serviceContainer')
 var ServiceFactory = require('../../src/common/serviceFactory')
 var patchCommon = require('../../src/common/patchCommon')
 

@@ -1,9 +1,9 @@
 // export public core APIs.
 
 module.exports['ServiceFactory'] = require('./common/serviceFactory')
-module.exports['ServiceContainer'] = require('./common/serviceContainer')
+module.exports['ServiceContainer'] = require('./performance/serviceContainer')
 module.exports['ConfigService'] = require('./lib/config')
-module.exports['TransactionService'] = require('./transaction/transaction_service')
+module.exports['TransactionService'] = require('./performance/transactionService')
 module.exports['Subscription'] = require('./common/subscription')
 
 module.exports['patchUtils'] = require('./common/patchUtils')

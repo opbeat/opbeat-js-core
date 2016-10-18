@@ -1,10 +1,6 @@
-var TransactionService = require('../transaction/transaction_service')
-
+var TransactionService = require('./transactionService')
+var ZoneService = require('./zoneService')
 var utils = require('../lib/utils')
-
-if (typeof window.Zone === 'undefined') {
-  require('zone.js')
-}
 
 function ServiceContainer (serviceFactory) {
   this.serviceFactory = serviceFactory
@@ -38,13 +34,11 @@ ServiceContainer.prototype.initialize = function () {
       }
     })
   }
-  this.services.exceptionHandler = this.serviceFactory.getExceptionHandler()
 }
 
 ServiceContainer.prototype.createZoneService = function () {
   var logger = this.services.logger
 
-  var ZoneService = require('../transaction/zone_service')
   return new ZoneService(window.Zone.current, logger, this.services.configService)
 }
 

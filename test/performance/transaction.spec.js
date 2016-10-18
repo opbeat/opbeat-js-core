@@ -1,5 +1,5 @@
-var Transaction = require('../../src/transaction/transaction')
-var Trace = require('../../src/transaction/trace')
+var Transaction = require('../../src/performance/transaction')
+var Trace = require('../../src/performance/trace')
 
 describe('transaction.Transaction', function () {
   beforeEach(function () {})
