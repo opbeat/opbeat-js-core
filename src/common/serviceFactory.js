@@ -5,6 +5,7 @@ var Config = require('../lib/config')
 var utils = require('../lib/utils')
 var transport = require('../lib/transport')
 var ExceptionHandler = require('../exceptions/exceptionHandler')
+var PerformanceServiceContainer = require('../performance/serviceContainer')
 
 function ServiceFactory () {
   this.services = {}
@@ -64,6 +65,10 @@ ServiceFactory.prototype.getExceptionHandler = function () {
     this.services['ExceptionHandler'] = exceptionHandler
   }
   return this.services['ExceptionHandler']
+}
+
+ServiceFactory.prototype.getPerformanceServiceContainer = function () {
+  return new PerformanceServiceContainer(this)
 }
 
 module.exports = ServiceFactory
