@@ -1,32 +1,23 @@
-# Opbeat for frontend JS
+# OpbeatJS core
 
-[![Build status](https://travis-ci.org/opbeat/opbeat-js.svg?branch=master)](https://travis-ci.org/opbeat/opbeat-js)
+[![Build status](https://travis-ci.org/opbeat/opbeat-js-core.svg?branch=master)](https://travis-ci.org/opbeat/opbeat-js-core)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 <a href="https://opbeat.com" title="Opbeat"><img src="http://opbeat-brand-assets.s3-website-us-east-1.amazonaws.com/svg/logo/logo.svg" align="right" height="25px"></a>
 
 
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/opbeat.svg)](https://saucelabs.com/u/opbeat)
+This is the core JavaScript module for [Opbeat](https://opbeat.com). 
 
+You probably want to use one of our [supported frameworks](https://opbeat.com/docs/topics/javascript/).
 
-This is the official frontend JavaScript module for [Opbeat](https://opbeat.com). 
-
-It enables error logging for frontend applications and performance monitoring for AngularJS applications.
+**Use this repo only if you want to implement an opbeat integration for a framework we don't supported.**
 
 If you are looking for a module for your Node.js applications, please see [Opbeat for Node.js](https://github.com/opbeat/opbeat-node) on GitHub.
 
-## Documentation
-
-- [Documentation overview](https://opbeat.com/docs/topics/javascript/)
-- [Get started with Opbeat for JavaScript](https://opbeat.com/docs/articles/get-started-with-javascript/) 
-- [Get started with Opbeat for AngularJS](https://opbeat.com/docs/articles/get-started-with-angularjs/)
-- [Module API](https://opbeat.com/docs/articles/opbeat-for-javascript-api/)
-
-
 ## Development
 
-Use `npm run karma` to continuously run unit tests during development
+Use `npm run karma` to continuously run unit tests during development.
 
-Use `npm test` to run both unit tests and e2e tests
+Use `npm test` to run both unit tests and e2e tests.
 
 
 ## License
