@@ -27,6 +27,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     if (task.source === 'XMLHttpRequest.send' && task.trace && !task.trace.ended) {
       task.trace.end()
     }
+    transactionService.logInTransaction('Executing', task.taskId)
   }
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
 
@@ -58,6 +59,7 @@ TransactionService.prototype.getTransaction = function (id) {
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
   var tr = new Transaction(name, type, options)
+  tr.contextInfo.debug.zone = this._zoneService.zone.name
   this._zoneService.set('transaction', tr)
   if (this._config.get('performance.checkBrowserResponsiveness')) {
     this.startCounter(tr)
@@ -106,9 +108,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
   if (!this.getCurrentTransaction()) {
     tr = this.createTransaction(name, type, perfOptions)
   } else {
-    tr.name = name
-    tr.type = type
-    tr._options = perfOptions
+    tr.redefine(name, type, perfOptions)
   }
 
   if (this.transactions.indexOf(tr) === -1) {
@@ -151,11 +151,6 @@ TransactionService.prototype.startTrace = function (signature, type, options) {
   return trace
 }
 
-// !!DEPRECATED!!
-TransactionService.prototype.isLocked = function () {
-  return false
-}
-
 TransactionService.prototype.add = function (transaction) {
   var perfOptions = this._config.get('performance')
   if (!perfOptions.enable) {
@@ -190,6 +185,12 @@ TransactionService.prototype.removeTask = function (taskId) {
   if (!utils.isUndefined(tr) && !tr.ended) {
     tr.removeTask(taskId)
     this._logger.debug('TransactionService.removeTask', taskId)
+  }
+}
+TransactionService.prototype.logInTransaction = function () {
+  var tr = this._zoneService.get('transaction')
+  if (!utils.isUndefined(tr) && !tr.ended) {
+    tr.debugLog.apply(tr, arguments)
   }
 }
 

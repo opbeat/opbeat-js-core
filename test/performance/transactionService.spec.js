@@ -1,5 +1,6 @@
 var TransactionService = require('../../src/performance/transactionService')
 var Transaction = require('../../src/performance/transaction')
+var Trace = require('../../src/performance/trace')
 
 var ZoneServiceMock = require('./zoneServiceMock.js')
 var logger = Object.create(require('loglevel'))
@@ -51,5 +52,20 @@ describe('TransactionService', function () {
     var result = transactionService.startTransaction('transaction', 'transaction')
 
     expect(result).toBeUndefined()
+  })
+
+  it('should call startTrace on current Transaction', function () {
+    var tr = new Transaction('transaction', 'transaction')
+    zoneServiceMock.zone.transaction = tr
+    expect(tr._scheduledTasks).toEqual({})
+    zoneServiceMock.spec.onScheduleTask({source: 'setTimeout',taskId: 'setTimeout1'})
+    zoneServiceMock.spec.onScheduleTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',XHR: {method: 'GET',url: 'url'}})
+    expect(tr._scheduledTasks).toEqual({setTimeout1: 'setTimeout1','XMLHttpRequest.send1': 'XMLHttpRequest.send1'})
+    zoneServiceMock.spec.onBeforeInvokeTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',trace: new Trace(tr, 'trace', 'trace')})
+    expect(tr._scheduledTasks).toEqual({setTimeout1: 'setTimeout1','XMLHttpRequest.send1': 'XMLHttpRequest.send1'})
+    zoneServiceMock.spec.onInvokeTask({source: 'setTimeout',taskId: 'setTimeout1'})
+    expect(tr._scheduledTasks).toEqual({'XMLHttpRequest.send1': 'XMLHttpRequest.send1'})
+    zoneServiceMock.spec.onCancelTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1'})
+    expect(tr._scheduledTasks).toEqual({})
   })
 })

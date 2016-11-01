@@ -21,7 +21,8 @@ function Config () {
       enableStackFrames: false,
       groupSimilarTraces: true,
       similarTraceThreshold: 0.05,
-      captureInteractions: false
+      captureInteractions: false,
+      sendVerboseDebugInfo: false
     },
     libraryPathPattern: '(node_modules|bower_components|webpack)',
     context: {},

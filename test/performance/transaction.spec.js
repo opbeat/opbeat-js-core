@@ -131,4 +131,31 @@ describe('transaction.Transaction', function () {
     var location = tr.contextInfo.browser.location
     expect(typeof location).toBe('string')
   })
+
+  it('should store debug.log in contextInfo', function () {
+    var tr = new Transaction('/', 'transaction', {sendVerboseDebugInfo: true})
+    expect(tr.contextInfo.debug.log.length).toBeGreaterThan(0)
+  })
+
+  it('should not create log on contextInfo.debug if sendVerboseDebugInfo is not true', function () {
+    var tr = new Transaction('/', 'transaction')
+    expect(tr.contextInfo.debug.log).toBeUndefined()
+  })
+
+  it('should redefine transaction', function () {
+    var tr = new Transaction('/', 'transaction', {sendVerboseDebugInfo: true})
+    tr.redefine('name', 'type', {test: 'test'})
+    expect(tr.name).toBe('name')
+    expect(tr.type).toBe('type')
+    expect(tr._options).toEqual({test: 'test'})
+  })
+
+  it('should add and remove tasks', function () {
+    var tr = new Transaction('/', 'transaction', {sendVerboseDebugInfo: true})
+    expect(tr._scheduledTasks).toEqual({})
+    tr.addTask('task1')
+    expect(tr._scheduledTasks).toEqual({'task1': 'task1'})
+    tr.removeTask('task1')
+    expect(tr._scheduledTasks).toEqual({})
+  })
 })

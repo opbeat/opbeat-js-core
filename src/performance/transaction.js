@@ -13,6 +13,17 @@ var Transaction = function (name, type, options) {
     this._options = {}
   }
 
+  this.contextInfo = {
+    debug: {},
+    browser: {
+      location: window.location.href
+    }
+  }
+  if (this._options.sendVerboseDebugInfo) {
+    this.contextInfo.debug.log = []
+    this.debugLog('Transaction', name, type)
+  }
+
   this.traces = []
   this._activeTraces = {}
 
@@ -32,16 +43,26 @@ var Transaction = function (name, type, options) {
 
   this.duration = this._rootTrace.duration.bind(this._rootTrace)
   this.nextId = 0
-  this.contextInfo = {
-    debug: {},
-    browser: {
-      location: window.location.href
-    }
+}
+
+Transaction.prototype.debugLog = function () {
+  if (this._options.sendVerboseDebugInfo) {
+    var messages = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments))
+    messages.unshift(Date.now().toString())
+    this.contextInfo.debug.log.push(messages.join(' - '))
   }
+}
+
+Transaction.prototype.redefine = function (name, type, options) {
+  this.debugLog('redefine', name, type)
+  this.name = name
+  this.type = type
+  this._options = options
 }
 
 Transaction.prototype.startTrace = function (signature, type, options) {
   // todo: should not accept more traces if the transaction is alreadyFinished
+  this.debugLog('startTrace', signature, type)
   var opts = typeof options === 'undefined' ? {} : options
   opts.enableStackFrames = this._options.enableStackFrames === true && opts.enableStackFrames !== false
 
@@ -69,9 +90,9 @@ Transaction.prototype.recordEvent = function (e) {
 }
 
 Transaction.prototype.isFinished = function () {
-  return (
-    Object.keys(this._scheduledTasks).length === 0 &&
-    Object.keys(this._activeTraces).length === 0)
+  var scheduledTasks = Object.keys(this._scheduledTasks)
+  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length)
+  return (scheduledTasks.length === 0)
 }
 
 Transaction.prototype.detectFinish = function () {
@@ -82,7 +103,7 @@ Transaction.prototype.end = function () {
   if (this.ended) {
     return
   }
-
+  this.debugLog('end')
   this.ended = true
   this._rootTrace.end()
 
@@ -93,11 +114,13 @@ Transaction.prototype.end = function () {
 }
 
 Transaction.prototype.addTask = function (taskId) {
-  // todo: should not accept more tasks if the transaction is alreadyFinished
+  // todo: should not accept more tasks if the transaction is alreadyFinished]
+  this.debugLog('addTask', taskId)
   this._scheduledTasks[taskId] = taskId
 }
 
 Transaction.prototype.removeTask = function (taskId) {
+  this.debugLog('removeTask', taskId)
   this.contextInfo.debug.lastRemovedTask = taskId
   delete this._scheduledTasks[taskId]
 }
