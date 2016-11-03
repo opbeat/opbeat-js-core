@@ -7,7 +7,7 @@ function ZoneServiceMock () {
     onCancelTask: noop
   }
 
-  this.zone = {}
+  this.zone = {name: 'opbeatMockZone'}
   this.get = function (key) {
     return this.zone[key]
   }
@@ -23,6 +23,14 @@ function ZoneServiceMock () {
 
   this.runInOpbeatZone = function (fn, applyThis, applyArgs) {
     return fn.apply(applyThis, applyArgs)
+  }
+
+  this.isOpbeatZone = function () {
+    return true
+  }
+
+  this.getCurrentZone = function () {
+    return this.zone
   }
 }
 module.exports = ZoneServiceMock

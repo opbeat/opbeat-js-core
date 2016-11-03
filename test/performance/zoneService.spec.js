@@ -268,6 +268,51 @@ describe('ZoneService', function () {
     })
   })
 
+  it('should work when aborting XMLHttpRequest', function () {
+    window.Zone.current.fork({}).run(function () {
+      var req = new window.XMLHttpRequest()
+      req.open('get', '/')
+      req.send()
+      req.abort()
+    })
+  })
+
+  it('should work when canceling setTimeout', function () {
+    zoneService.runInOpbeatZone(function () {
+      var id = setTimeout(function () {}, 0)
+      clearTimeout(id)
+    })
+  })
+
+  it('should getCurrentZone', function () {
+    window.Zone.current.fork({name: 'testZone'}).run(function () {
+      var zone = zoneService.getCurrentZone()
+      expect(zone.name).toBe('testZone')
+    })
+  })
+
+  it('should get and set values on the zone', function () {
+    window.Zone.current.fork({name: 'testZone'}).run(function () {
+      zoneService.set('testKey', 'testValue')
+      expect(zoneService.get('testKey')).toBe('testValue')
+      expect(window.Zone.current.get('testKey')).toBe('testValue')
+    })
+  })
+
+  it('should test for opbeat zone', function () {
+    zoneService.runOuter(function () {
+      expect(zoneService.isOpbeatZone()).toBe(false)
+    })
+    zoneService.runInOpbeatZone(function () {
+      expect(zoneService.isOpbeatZone()).toBe(true)
+    })
+    zoneService.runOuter(function () {
+      zoneService.runInOpbeatZone(function () {
+        expect(zoneService.isOpbeatZone()).toBe(true)
+      })
+    })
+  })
+
   afterEach(function () {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout
   })

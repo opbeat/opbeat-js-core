@@ -176,7 +176,11 @@ ZoneService.prototype.get = function (key) {
 }
 
 ZoneService.prototype.getCurrentZone = function () {
-  return window.zone
+  return window.Zone.current
+}
+
+ZoneService.prototype.isOpbeatZone = function () {
+  return this.zone.name === window.Zone.current.name
 }
 
 ZoneService.prototype.runOuter = function (fn) {
