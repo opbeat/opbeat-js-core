@@ -59,7 +59,7 @@ TransactionService.prototype.getTransaction = function (id) {
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
   var tr = new Transaction(name, type, options)
-  tr.contextInfo.debug.zone = this._zoneService.zone.name
+  tr.contextInfo.debug.zone = this._zoneService.getCurrentZone().name
   this._zoneService.set('transaction', tr)
   if (this._config.get('performance.checkBrowserResponsiveness')) {
     this.startCounter(tr)
@@ -96,7 +96,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
   var self = this
 
   var perfOptions = this._config.get('performance')
-  if (!perfOptions.enable) {
+  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
     return
   }
 
@@ -132,7 +132,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
 
 TransactionService.prototype.startTrace = function (signature, type, options) {
   var perfOptions = this._config.get('performance')
-  if (!perfOptions.enable) {
+  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
     return
   }
 

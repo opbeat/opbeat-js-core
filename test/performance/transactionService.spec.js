@@ -54,6 +54,26 @@ describe('TransactionService', function () {
     expect(result).toBeUndefined()
   })
 
+  it('should not start transaction when not in opbeat zone', function () {
+    zoneServiceMock.isOpbeatZone = function () {
+      return false
+    }
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var result = transactionService.startTransaction('transaction', 'transaction')
+
+    expect(result).toBeUndefined()
+  })
+
+  it('should start transaction', function () {
+    config.set('performance.enable', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var result = transactionService.startTransaction('transaction', 'transaction')
+
+    expect(result).toBeDefined()
+  })
+
   it('should call startTrace on current Transaction', function () {
     var tr = new Transaction('transaction', 'transaction')
     zoneServiceMock.zone.transaction = tr
