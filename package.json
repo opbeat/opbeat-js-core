@@ -16,7 +16,8 @@
   },
   "private": true,
   "files": [
-    "src/**/*.js"
+    "src/**/*.js",
+    "test/**/*.js"
   ],
   "repository": {
     "type": "git",
