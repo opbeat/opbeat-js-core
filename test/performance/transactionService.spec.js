@@ -67,11 +67,32 @@ describe('TransactionService', function () {
 
   it('should start transaction', function () {
     config.set('performance.enable', true)
+    config.set('performance.browserResponsivenessInterval', true)
     transactionService = new TransactionService(zoneServiceMock, logger, config)
 
-    var result = transactionService.startTransaction('transaction', 'transaction')
-
+    var result = transactionService.startTransaction('transaction1', 'transaction')
     expect(result).toBeDefined()
+    result = transactionService.startTransaction('transaction2', 'transaction')
+    expect(result.name).toBe('transaction2')
+  })
+
+  it('should create a zone transaction on the first trace', function () {
+    config.set('performance.enable', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var trace = transactionService.startTrace('testTrace', 'testtype')
+    var trans = zoneServiceMock.get('transaction')
+    expect(trans.name).toBe('ZoneTransaction')
+    transactionService.startTransaction('transaction', 'transaction')
+    expect(trans.name).toBe('transaction')
+  })
+
+  it('should not start interactions by default', function () {
+    config.set('performance.enable', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var trans = transactionService.startTransaction('interaction', 'interaction')
+    expect(trans).toBeUndefined()
   })
 
   it('should call startTrace on current Transaction', function () {

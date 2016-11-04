@@ -104,11 +104,20 @@ TransactionService.prototype.startTransaction = function (name, type) {
     return
   }
 
-  var tr = this._zoneService.get('transaction')
-  if (!this.getCurrentTransaction()) {
-    tr = this.createTransaction(name, type, perfOptions)
+  var tr = this.getCurrentTransaction()
+
+  if (tr) {
+    if (tr.name !== 'ZoneTransaction') {
+      // todo: need to handle cases in which the transaction has active traces and/or scheduled tasks
+      this.logInTransaction('Ending early to start a new transaction:', name, type)
+      this._logger.debug('Ending old transaction', tr)
+      tr.end()
+      tr = this.createTransaction(name, type, perfOptions)
+    } else {
+      tr.redefine(name, type, perfOptions)
+    }
   } else {
-    tr.redefine(name, type, perfOptions)
+    tr = this.createTransaction(name, type, perfOptions)
   }
 
   if (this.transactions.indexOf(tr) === -1) {
