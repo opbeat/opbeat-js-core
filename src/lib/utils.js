@@ -210,9 +210,9 @@ module.exports = {
   getCurrentScript: function () {
     // Source http://www.2ality.com/2014/05/current-script.html
     return document.currentScript || (function () {
-      var scripts = document.getElementsByTagName('script')
-      return scripts[scripts.length - 1]
-    })()
+        var scripts = document.getElementsByTagName('script')
+        return scripts[scripts.length - 1]
+      })()
   },
 
   generateUuid: function () {
@@ -221,6 +221,27 @@ module.exports = {
       return s ? '-' + p.substr(0, 4) + '-' + p.substr(4, 4) : p
     }
     return _p8() + _p8(true) + _p8(true) + _p8()
+  },
+
+  parseUrl: function parseUrl (url) {
+    // source: angular.js/$LocationProvider
+    var PATH_MATCH = /^([^\?#]*)(\?([^#]*))?(#(.*))?$/
+    var match = PATH_MATCH.exec(url)
+    var path = match[1] || ''
+    var queryString = match[3] || ''
+
+    var params = {}
+    var queries = queryString.split('&')
+    for (var i = 0, l = queries.length; i < l; i++) {
+      var query = queries[i]
+      if (query === '' || typeof query === 'undefined' || query === null) {
+        continue
+      }
+      var keyvalue = queries[i].split('=')
+      var key = keyvalue.shift()
+      params[key] = keyvalue.join('=')
+    }
+    return { path: path, queryString: queryString, queryStringParsed: params }
   }
 
 }

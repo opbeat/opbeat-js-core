@@ -22,4 +22,37 @@ describe('lib/utils', function () {
     deepMerged = utils.merge({a: null}, {b: 'b', a: null})
     expect(deepMerged).toEqual(Object({a: null, b: 'b'}))
   })
+
+  describe('parseUrl', function () {
+    it('should parse relative url', function () {
+      var result = utils.parseUrl('/path?param=value&param2=value2&0=zero&foo&empty=&key=double=double&undefined')
+      var expected = {path: '/path',queryString: 'param=value&param2=value2&0=zero&foo&empty=&key=double=double&undefined',  queryStringParsed: {param: 'value', param2: 'value2', 0: 'zero', foo: '', empty: '', key: 'double=double',undefined: ''}}
+      expect(result).toEqual(expected)
+    })
+
+    it('should parse absolute url', function () {
+      var result = utils.parseUrl('http://test.com/path?param=value')
+      expect(result).toEqual({path: 'http://test.com/path',queryString: 'param=value', queryStringParsed: {param: 'value'}})
+    })
+
+    it('should parse url with fragment part', function () {
+      var result = utils.parseUrl('http://test.com/path?param=value#fragment')
+      expect(result).toEqual({path: 'http://test.com/path',queryString: 'param=value', queryStringParsed: {param: 'value'}})
+    })
+
+    it('should parse url with leading &', function () {
+      var result = utils.parseUrl('/path/?&param=value')
+      expect(result).toEqual({path: '/path/', queryString: '&param=value', queryStringParsed: {'param': 'value'}})
+    })
+
+    it('should parse url with not querystring', function () {
+      var result = utils.parseUrl('/path')
+      expect(result).toEqual({path: '/path',queryString: '',queryStringParsed: {}})
+    })
+
+    it('should parse url with only the querystring', function () {
+      var result = utils.parseUrl('?param=value')
+      expect(result).toEqual({path: '',queryString: 'param=value',queryStringParsed: {param: 'value'}})
+    })
+  })
 })
