@@ -30,10 +30,18 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     transactionService.logInTransaction('Executing', task.taskId)
   }
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
-
   function onScheduleTask (task) {
     if (task.source === 'XMLHttpRequest.send') {
-      var trace = transactionService.startTrace(task['XHR']['method'] + ' ' + task['XHR']['url'], 'ext.HttpRequest', {'enableStackFrames': false})
+      var url = task['XHR']['url']
+      var traceSignature = task['XHR']['method'] + ' '
+      if (transactionService._config.get('performance.includeXHRQueryString')) {
+        traceSignature = traceSignature + url
+      } else {
+        var parsed = utils.parseUrl(url)
+        traceSignature = traceSignature + parsed.path
+      }
+
+      var trace = transactionService.startTrace(traceSignature, 'ext.HttpRequest', {'enableStackFrames': false})
       task.trace = trace
     }
     transactionService.addTask(task.taskId)

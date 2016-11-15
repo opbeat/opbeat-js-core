@@ -109,4 +109,25 @@ describe('TransactionService', function () {
     zoneServiceMock.spec.onCancelTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1'})
     expect(tr._scheduledTasks).toEqual({})
   })
+
+  it('should remove XHR query string by default', function () {
+    expect(config.get('performance.includeXHRQueryString')).toBe(false)
+    var tr = new Transaction('transaction', 'transaction')
+    zoneServiceMock.zone.transaction = tr
+    spyOn(transactionService, 'startTrace').and.callThrough()
+
+    zoneServiceMock.spec.onScheduleTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',XHR: {method: 'GET',url: 'http://test.com/path?key=value'}})
+    expect(transactionService.startTrace).toHaveBeenCalledWith('GET http://test.com/path', 'ext.HttpRequest', { enableStackFrames: false })
+  })
+
+  it('should check performance.includeXHRQueryString config', function () {
+    config.set('performance.includeXHRQueryString', true)
+    expect(config.get('performance.includeXHRQueryString')).toBe(true)
+    var tr = new Transaction('transaction', 'transaction')
+    zoneServiceMock.zone.transaction = tr
+    spyOn(transactionService, 'startTrace').and.callThrough()
+
+    zoneServiceMock.spec.onScheduleTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',XHR: {method: 'GET',url: 'http://test.com/path?key=value'}})
+    expect(transactionService.startTrace).toHaveBeenCalledWith('GET http://test.com/path?key=value', 'ext.HttpRequest', { enableStackFrames: false })
+  })
 })
