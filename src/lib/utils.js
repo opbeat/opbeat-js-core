@@ -229,6 +229,12 @@ module.exports = {
     var match = PATH_MATCH.exec(url)
     var path = match[1] || ''
     var queryString = match[3] || ''
+    var hash = match[5] || ''
+
+    var protocol = ''
+    if (url.indexOf('://') > -1) {
+      protocol = url.split('://')[0]
+    }
 
     var params = {}
     var queries = queryString.split('&')
@@ -241,7 +247,7 @@ module.exports = {
       var key = keyvalue.shift()
       params[key] = keyvalue.join('=')
     }
-    return { path: path, queryString: queryString, queryStringParsed: params }
+    return { protocol: protocol, path: path, queryString: queryString, queryStringParsed: params, hash: hash }
   }
 
 }
