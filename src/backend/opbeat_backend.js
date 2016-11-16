@@ -1,5 +1,7 @@
 var backendUtils = require('./backend_utils')
 var utils = require('../lib/utils')
+var URL = require('url-parse')
+
 module.exports = OpbeatBackend
 function OpbeatBackend (transport, logger, config) {
   this._logger = logger
@@ -102,11 +104,27 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
 
       var ctx = transaction.contextInfo
       if (ctx.browser && ctx.browser.location) {
+        var browserData = ctx.browser
         ctx.browser.location = ctx.browser.location.substring(0, 511)
-        var protocol = ctx.browser.location.split('://')[0]
-        var acceptedProtocols = ['http', 'https', 'file']
+
+        var parsed = new URL(ctx.browser.location, true)
+
+        var protocol = parsed.protocol
+        var acceptedProtocols = ['http:', 'https:', 'file:']
         if (acceptedProtocols.indexOf(protocol) < 0) {
           delete ctx.browser.location
+        } else {
+          var url = {protocol: parsed.protocol,host: parsed.host}
+          ctx.browser.url = url
+          if (parsed.pathname) {
+            url.pathname = parsed.pathname
+          }
+          if (Object.keys(parsed.query).length > 0) {
+            url.query = parsed.query
+          }
+          if (parsed.hash) {
+            url.hash = parsed.hash
+          }
         }
       }
       if (checkBrowserResponsiveness) {
