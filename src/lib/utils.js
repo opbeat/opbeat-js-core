@@ -209,10 +209,12 @@ module.exports = {
 
   getCurrentScript: function () {
     // Source http://www.2ality.com/2014/05/current-script.html
-    return document.currentScript || (function () {
-        var scripts = document.getElementsByTagName('script')
-        return scripts[scripts.length - 1]
-      })()
+    var currentScript = document.currentScript
+    if (!currentScript) {
+      var scripts = document.getElementsByTagName('script')
+      currentScript = scripts[scripts.length - 1]
+    }
+    return currentScript
   },
 
   generateUuid: function () {
