@@ -87,6 +87,13 @@ describe('TransactionService', function () {
     expect(trans.name).toBe('transaction')
   })
 
+  it('should not create transaction if performance is not enabled', function () {
+    config.set('performance.enable', false)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    var result = transactionService.createTransaction('test', 'test', config.get('performance'))
+    expect(result).toBeUndefined()
+  })
+
   it('should not start interactions by default', function () {
     config.set('performance.enable', true)
     transactionService = new TransactionService(zoneServiceMock, logger, config)

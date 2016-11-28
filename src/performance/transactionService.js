@@ -66,13 +66,37 @@ TransactionService.prototype.getTransaction = function (id) {
 }
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
-  var tr = new Transaction(name, type, options)
+  var perfOptions = options
+  if (utils.isUndefined(perfOptions)) {
+    perfOptions = this._config.get('performance')
+  }
+  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
+    return
+  }
+
+  var tr = new Transaction(name, type, perfOptions)
   tr.contextInfo.debug.zone = this._zoneService.getCurrentZone().name
   this._zoneService.set('transaction', tr)
-  if (this._config.get('performance.checkBrowserResponsiveness')) {
+  if (perfOptions.checkBrowserResponsiveness) {
     this.startCounter(tr)
   }
   return tr
+}
+
+TransactionService.prototype.createZoneTransaction = function () {
+  return this.createTransaction('ZoneTransaction', 'transaction')
+}
+
+TransactionService.prototype.getCurrentTransaction = function () {
+  var perfOptions = this._config.get('performance')
+  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
+    return
+  }
+  var tr = this._zoneService.get('transaction')
+  if (!utils.isUndefined(tr) && !tr.ended) {
+    return tr
+  }
+  return this.createZoneTransaction()
 }
 
 TransactionService.prototype.startCounter = function (transaction) {
@@ -93,21 +117,9 @@ TransactionService.prototype.startCounter = function (transaction) {
   })
 }
 
-TransactionService.prototype.getCurrentTransaction = function () {
-  var tr = this._zoneService.get('transaction')
-  if (!utils.isUndefined(tr) && !tr.ended) {
-    return tr
-  }
-}
-
 TransactionService.prototype.startTransaction = function (name, type) {
   var self = this
-
   var perfOptions = this._config.get('performance')
-  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
-    return
-  }
-
   if (type === 'interaction' && !perfOptions.captureInteractions) {
     return
   }
@@ -120,12 +132,12 @@ TransactionService.prototype.startTransaction = function (name, type) {
       this.logInTransaction('Ending early to start a new transaction:', name, type)
       this._logger.debug('Ending old transaction', tr)
       tr.end()
-      tr = this.createTransaction(name, type, perfOptions)
+      tr = this.createTransaction(name, type)
     } else {
       tr.redefine(name, type, perfOptions)
     }
   } else {
-    tr = this.createTransaction(name, type, perfOptions)
+    return
   }
 
   if (this.transactions.indexOf(tr) === -1) {
@@ -148,24 +160,13 @@ TransactionService.prototype.startTransaction = function (name, type) {
 }
 
 TransactionService.prototype.startTrace = function (signature, type, options) {
-  var perfOptions = this._config.get('performance')
-  if (!perfOptions.enable || !this._zoneService.isOpbeatZone()) {
-    return
-  }
-
   var trans = this.getCurrentTransaction()
 
   if (trans) {
     this._logger.debug('TransactionService.startTrace', signature, type)
-  } else {
-    trans = this.createTransaction('ZoneTransaction', 'transaction', perfOptions)
-    this._logger.debug('TransactionService.startTrace - ZoneTransaction', signature, type)
+    var trace = trans.startTrace(signature, type, options)
+    return trace
   }
-
-  var trace = trans.startTrace(signature, type, options)
-  // var zone = this._zoneService.getCurrentZone()
-  // trace._zone = 'Zone(' + zone.$id + ') ' // parent(' + zone.parent.$id + ') '
-  return trace
 }
 
 TransactionService.prototype.add = function (transaction) {
@@ -191,8 +192,8 @@ TransactionService.prototype.subscribe = function (fn) {
 }
 
 TransactionService.prototype.addTask = function (taskId) {
-  var tr = this._zoneService.get('transaction')
-  if (!utils.isUndefined(tr) && !tr.ended) {
+  var tr = this.getCurrentTransaction()
+  if (tr) {
     tr.addTask(taskId)
     this._logger.debug('TransactionService.addTask', taskId)
   }
