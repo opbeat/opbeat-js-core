@@ -137,4 +137,15 @@ describe('TransactionService', function () {
     zoneServiceMock.spec.onScheduleTask({source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',XHR: {method: 'GET',url: 'http://test.com/path?key=value'}})
     expect(transactionService.startTrace).toHaveBeenCalledWith('GET http://test.com/path?key=value', 'ext.HttpRequest', { enableStackFrames: false })
   })
+
+  it('should call detectFinish onInvokeEnd', function () {
+    config.set('performance.enable', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var trans = transactionService.startTransaction('transaction', 'transaction')
+    spyOn(trans, 'detectFinish')
+    zoneServiceMock.spec.onInvokeStart({source: 'source',type: 'type'})
+    zoneServiceMock.spec.onInvokeEnd({source: 'source',type: 'type'})
+    expect(trans.detectFinish).toHaveBeenCalled()
+  })
 })
