@@ -22,7 +22,9 @@ function ZoneService (zone, logger, config) {
     onBeforeInvokeTask: noop,
     onInvokeTask: noop,
     onCancelTask: noop,
-    onHandleError: noop
+    onHandleError: noop,
+    onInvokeStart: noop,
+    onInvokeEnd: noop
   }
 
   var zoneConfig = {
@@ -91,7 +93,14 @@ function ZoneService (zone, logger, config) {
       var delegateTask = parentZoneDelegate.scheduleTask(targetZone, task)
       return delegateTask
     },
+    onInvoke: function (parentZoneDelegate, currentZone, targetZone, delegate, applyThis, applyArgs, source) {
+      spec.onInvokeStart({source: source, type: 'invoke'})
+      var result = delegate.apply(applyThis, applyArgs)
+      spec.onInvokeEnd({source: source, type: 'invoke'})
+      return result
+    },
     onInvokeTask: function (parentZoneDelegate, currentZone, targetZone, task, applyThis, applyArgs) {
+      spec.onInvokeStart({source: task.source, type: task.type})
       logger.trace('zoneservice.onInvokeTask', task.source, ' type:', task.type)
       var hasTarget = task.data && task.data.target
       var result
@@ -121,6 +130,7 @@ function ZoneService (zone, logger, config) {
       } else {
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
       }
+      spec.onInvokeEnd({source: task.source, type: task.type})
       return result
     },
     onCancelTask: function (parentZoneDelegate, currentZone, targetZone, task) {
@@ -187,12 +197,8 @@ ZoneService.prototype.runOuter = function (fn) {
   return this.outer.run(fn)
 }
 
-ZoneService.prototype.runInOpbeatZone = function runInOpbeatZone (fn, applyThis, applyArgs) {
-  if (this.zone.name === window.Zone.current.name) {
-    return fn.apply(applyThis, applyArgs)
-  } else {
-    return this.zone.run(fn, applyThis, applyArgs)
-  }
+ZoneService.prototype.runInOpbeatZone = function runInOpbeatZone (fn, applyThis, applyArgs, source) {
+  return this.zone.run(fn, applyThis, applyArgs, source || 'runInOpbeatZone:' + fn.name)
 }
 
 module.exports = ZoneService

@@ -303,10 +303,16 @@ describe('ZoneService', function () {
     zoneService.runOuter(function () {
       expect(zoneService.isOpbeatZone()).toBe(false)
     })
-    zoneService.runInOpbeatZone(function () {
+    var result = zoneService.runInOpbeatZone(function () {
       expect(zoneService.isOpbeatZone()).toBe(true)
+      return zoneService.runInOpbeatZone(function () {
+        expect(zoneService.isOpbeatZone()).toBe(true)
+        return 'hamid'
+      })
     })
+    expect(result).toBe('hamid')
     zoneService.runOuter(function () {
+      expect(zoneService.isOpbeatZone()).toBe(false)
       zoneService.runInOpbeatZone(function () {
         expect(zoneService.isOpbeatZone()).toBe(true)
       })
