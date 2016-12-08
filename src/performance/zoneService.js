@@ -51,7 +51,7 @@ function ZoneService (zone, logger, config) {
         }
 
         if (task.source === 'setTimeout') {
-          if (task.data.args[1] === 0) {
+          if (task.data.args[1] === 0 || typeof task.data.args[1] === 'undefined') {
             task[opbeatTaskSymbol] = opbeatTask
             spec.onScheduleTask(opbeatTask)
           }

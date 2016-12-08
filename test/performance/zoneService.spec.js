@@ -15,6 +15,7 @@ describe('ZoneService', function () {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 50000
   })
+  //  can't create a new ZoneService for each test since the old one is also using the global zone
   zoneService = new ZoneService(window.Zone.current, logger)
 
   function resetZoneCallbacks (zoneService) {
@@ -41,8 +42,10 @@ describe('ZoneService', function () {
       expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
 
       // should call done asynchronously since we're spying in this function in multiple tests
-      setTimeout(function () {
-        done()
+      zoneService.runOuter(function () {
+        setTimeout(function () {
+          done()
+        })
       })
     }
 
@@ -80,8 +83,10 @@ describe('ZoneService', function () {
       expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
 
       // should call done asynchronously since we're spying in this function in multiple tests
-      setTimeout(function () {
-        done()
+      zoneService.runOuter(function () {
+        setTimeout(function () {
+          done()
+        })
       })
     }
 
@@ -115,8 +120,10 @@ describe('ZoneService', function () {
       expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
 
       // should call done asynchronously since we're spying in this function in multiple tests
-      setTimeout(function () {
-        done()
+      zoneService.runOuter(function () {
+        setTimeout(function () {
+          done()
+        })
       })
     }
 
@@ -148,8 +155,10 @@ describe('ZoneService', function () {
       expect(zoneService.spec.onBeforeInvokeTask).toHaveBeenCalled()
 
       // should call done asynchronously since we're spying in this function in multiple tests
-      setTimeout(function () {
-        done()
+      zoneService.runOuter(function () {
+        setTimeout(function () {
+          done()
+        })
       })
     }
 
@@ -218,6 +227,26 @@ describe('ZoneService', function () {
       setTimeout(function () {
         callbackFlag = true
       }, 0)
+    })
+  })
+
+  it('should call registered event listeners for setTimeout if timeout is undefined', function (done) {
+    var callbackFlag = false
+    resetZoneCallbacks(zoneService)
+
+    zoneService.spec.onInvokeTask = function (task) {
+      expect(callbackFlag).toBe(true)
+      expect(zoneService.spec.onScheduleTask).toHaveBeenCalled()
+      done()
+    }
+
+    spyOn(zoneService.spec, 'onScheduleTask').and.callThrough()
+    spyOn(zoneService.spec, 'onInvokeTask').and.callThrough()
+
+    zoneService.zone.run(function () {
+      setTimeout(function () {
+        callbackFlag = true
+      })
     })
   })
 
