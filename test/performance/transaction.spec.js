@@ -36,10 +36,11 @@ describe('transaction.Transaction', function () {
 
     lastTrace.end()
     transaction.detectFinish()
-
-    expect(transaction._rootTrace._start).toBe(firstTrace._start)
-    expect(transaction._rootTrace._end >= lastTrace._end).toBeTruthy()
-    done()
+    transaction.donePromise.then(function () {
+      expect(transaction._rootTrace._start).toBe(firstTrace._start)
+      expect(transaction._rootTrace._end >= lastTrace._end).toBeTruthy()
+      done()
+    })
   })
 
   it('should adjust rootTrace to latest trace', function (done) {

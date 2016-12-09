@@ -158,15 +158,19 @@ Transaction.prototype._finish = function () {
     this.traces.push(eventTrace)
   }
 
-  this._adjustStartToEarliestTrace()
-  this._adjustEndToLatestTrace()
-
   var self = this
-  var whenAllTracesFinished = self.traces.map(function (trace) {
+  var allTraces = Object.keys(self._activeTraces).map(function (key) {
+    return self._activeTraces[key]
+  })
+  allTraces = allTraces.concat(self.traces)
+
+  var whenAllTracesFinished = allTraces.map(function (trace) {
     return trace._isFinish
   })
 
   Promise.all(whenAllTracesFinished).then(function () {
+    self._adjustStartToEarliestTrace()
+    self._adjustEndToLatestTrace()
     self.donePromise._resolve(self)
   })
 }
