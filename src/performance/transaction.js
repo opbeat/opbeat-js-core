@@ -53,6 +53,10 @@ Transaction.prototype.debugLog = function () {
   }
 }
 
+Transaction.prototype.setDebugData = function setDebugData (key, value) {
+  this.contextInfo.debug[key] = value
+}
+
 Transaction.prototype.redefine = function (name, type, options) {
   this.debugLog('redefine', name, type)
   this.name = name

@@ -148,4 +148,15 @@ describe('TransactionService', function () {
     zoneServiceMock.spec.onInvokeEnd({source: 'source',type: 'type'})
     expect(trans.detectFinish).toHaveBeenCalled()
   })
+
+  it('should end the trace if onInvokeTask is called first', function () {
+    var tr = new Transaction('transaction', 'transaction')
+    zoneServiceMock.zone.transaction = tr
+    var task = {source: 'XMLHttpRequest.send',taskId: 'XMLHttpRequest.send1',XHR: {method: 'GET',url: 'http://test.com/path?key=value'}}
+    zoneServiceMock.spec.onScheduleTask(task)
+    expect(task.trace).toBeDefined()
+    expect(task.trace.ended).toBe(false)
+    zoneServiceMock.spec.onInvokeTask(task)
+    expect(task.trace.ended).toBe(true)
+  })
 })

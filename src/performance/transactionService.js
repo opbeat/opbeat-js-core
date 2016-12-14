@@ -49,6 +49,11 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   zoneService.spec.onScheduleTask = onScheduleTask
 
   function onInvokeTask (task) {
+    if (task.source === 'XMLHttpRequest.send' && task.trace && !task.trace.ended) {
+      task.trace.end()
+      transactionService.logInTransaction('xhr late ending')
+      transactionService.setDebugDataOnTransaction('xhr_late_ending', true)
+    }
     transactionService.removeTask(task.taskId)
     transactionService.detectFinish()
   }
@@ -219,6 +224,12 @@ TransactionService.prototype.logInTransaction = function () {
   var tr = this._zoneService.get('transaction')
   if (!utils.isUndefined(tr) && !tr.ended) {
     tr.debugLog.apply(tr, arguments)
+  }
+}
+TransactionService.prototype.setDebugDataOnTransaction = function setDebugDataOnTransaction (key, value) {
+  var tr = this._zoneService.get('transaction')
+  if (!utils.isUndefined(tr) && !tr.ended) {
+    tr.setDebugData(key, value)
   }
 }
 
