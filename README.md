@@ -9,7 +9,7 @@ This is the core JavaScript module for [Opbeat](https://opbeat.com).
 
 **Only use this repo if you want to implement an integration for a framework Opbeat does not support yet.**
 
-The module contains the APIs used by other JavaScript integrations like [Opbeat for AngularJS](https://github.com/opbeat/opbeat-angular) and [Opbeat for plaing JavaScript](https://github.com/opbeat/opbeat-plain-js/).
+The module contains the APIs used by other JavaScript integrations like [Opbeat for AngularJS](https://github.com/opbeat/opbeat-angular) and [Opbeat for plain JavaScript](https://github.com/opbeat/opbeat-plain-js/).
 
 If you want error logging or performance monitoring in your frontend app, you probably want to use one of our [supported frontend modules](https://opbeat.com/docs/topics/javascript/). If you are looking for a module for your Node.js applications, please see [Opbeat for Node.js](https://github.com/opbeat/opbeat-node) on GitHub.
 
