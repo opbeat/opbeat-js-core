@@ -176,7 +176,20 @@ Transaction.prototype._finish = function () {
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {
-  var latestTrace = findLatestTrace(this.traces)
+  var latestTrace
+  var rootTrace = this._rootTrace
+  this.traces.forEach(function (trace) {
+    // Excluding rootTrace
+    if (trace === rootTrace) return
+
+    if (!latestTrace) {
+      latestTrace = trace
+    }
+    if (latestTrace && latestTrace._end < trace._end) {
+      latestTrace = trace
+    }
+  })
+
   if (typeof latestTrace !== 'undefined') {
     this._rootTrace._end = latestTrace._end
     this._rootTrace.calcDiff()
@@ -206,21 +219,6 @@ function getEarliestTrace (traces) {
   })
 
   return earliestTrace
-}
-
-function findLatestTrace (traces) {
-  var latestTrace = null
-
-  traces.forEach(function (trace) {
-    if (!latestTrace) {
-      latestTrace = trace
-    }
-    if (latestTrace && latestTrace._end < trace._end) {
-      latestTrace = trace
-    }
-  })
-
-  return latestTrace
 }
 
 module.exports = Transaction

@@ -61,7 +61,7 @@ describe('transaction.Transaction', function () {
 
       setTimeout(function () {
         expect(transaction._rootTrace._start).toBe(rootTraceStart)
-        expect(transaction._rootTrace._end).toBeGreaterThan(longTrace._end)
+        expect(transaction._rootTrace._end).toEqual(longTrace._end)
         done()
       })
     }, 500)
