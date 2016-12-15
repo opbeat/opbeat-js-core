@@ -52,7 +52,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     if (task.source === 'XMLHttpRequest.send' && task.trace && !task.trace.ended) {
       task.trace.end()
       transactionService.logInTransaction('xhr late ending')
-      transactionService.setDebugDataOnTransaction('xhr_late_ending', true)
+      transactionService.setDebugDataOnTransaction('xhrLateEnding', true)
     }
     transactionService.removeTask(task.taskId)
     transactionService.detectFinish()
