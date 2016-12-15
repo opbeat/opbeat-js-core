@@ -126,9 +126,9 @@ describe('transaction.Transaction', function () {
     tr.end()
   })
 
-  it('should store contextInfo.browser.location', function () {
+  it('should store contextInfo.url.location', function () {
     var tr = new Transaction('/', 'transaction')
-    var location = tr.contextInfo.browser.location
+    var location = tr.contextInfo.url.location
     expect(typeof location).toBe('string')
   })
 

@@ -231,11 +231,11 @@ module.exports = {
     var match = PATH_MATCH.exec(url)
     var path = match[1] || ''
     var queryString = match[3] || ''
-    var hash = match[5] || ''
+    var hash = match[5] ? '#' + match[5] : ''
 
     var protocol = ''
     if (url.indexOf('://') > -1) {
-      protocol = url.split('://')[0]
+      protocol = url.split('://')[0] + ':'
     }
 
     var params = {}

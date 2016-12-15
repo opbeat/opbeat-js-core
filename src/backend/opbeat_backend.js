@@ -1,6 +1,5 @@
 var backendUtils = require('./backend_utils')
 var utils = require('../lib/utils')
-var URL = require('url-parse')
 
 module.exports = OpbeatBackend
 function OpbeatBackend (transport, logger, config) {
@@ -82,6 +81,53 @@ OpbeatBackend.prototype.checkBrowserResponsiveness = function (transaction, inte
   return wasBrowserResponsive
 }
 
+OpbeatBackend.prototype.setTransactionContextInfo = function setTransactionContextInfo (transaction) {
+  var opbeatBackend = this
+  var browserResponsivenessInterval = opbeatBackend._config.get('performance.browserResponsivenessInterval')
+  var checkBrowserResponsiveness = opbeatBackend._config.get('performance.checkBrowserResponsiveness')
+
+  var context = opbeatBackend._config.get('context')
+  if (context) {
+    transaction.contextInfo = utils.merge(transaction.contextInfo || {}, context)
+  }
+
+  var ctx = transaction.contextInfo
+  var url = ctx.url
+  if (url && url.location) {
+    url.location = url.location.substring(0, 511)
+
+    // var parsed = new URL(ctx.url.location, true)
+    var parsed = utils.parseUrl(url.location)
+
+    var protocol = parsed.protocol
+    var acceptedProtocols = ['http:', 'https:', 'file:']
+    if (acceptedProtocols.indexOf(protocol) < 0) {
+      delete url.location
+    } else {
+      url.base = parsed.path
+      if (Object.keys(parsed.queryStringParsed).length > 0) {
+        url.query = parsed.queryStringParsed
+      }
+      if (parsed.hash) {
+        url.hash = parsed.hash
+      }
+    }
+  }
+  if (!ctx.system) {
+    ctx.system = {}
+  }
+  ctx.system.opbeat = opbeatBackend._config.getAgentName()
+
+  if (!ctx.debug) {
+    ctx.debug = {}
+  }
+
+  if (checkBrowserResponsiveness) {
+    ctx.debug.browserResponsivenessCounter = transaction.browserResponsivenessCounter
+    ctx.debug.browserResponsivenessInterval = browserResponsivenessInterval
+  }
+}
+
 OpbeatBackend.prototype.sendTransactions = function (transactionList) {
   var opbeatBackend = this
   if (this._config.isValid()) {
@@ -97,42 +143,7 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
         var similarTraceThreshold = opbeatBackend._config.get('performance.similarTraceThreshold')
         transaction.traces = opbeatBackend.groupSmallContinuouslySimilarTraces(transaction, similarTraceThreshold)
       }
-      var context = opbeatBackend._config.get('context')
-      if (context) {
-        transaction.contextInfo = utils.merge(transaction.contextInfo || {}, context)
-      }
-
-      var ctx = transaction.contextInfo
-      if (ctx.browser && ctx.browser.location) {
-        ctx.browser.location = ctx.browser.location.substring(0, 511)
-
-        var parsed = new URL(ctx.browser.location, true)
-
-        var protocol = parsed.protocol
-        var acceptedProtocols = ['http:', 'https:', 'file:']
-        if (acceptedProtocols.indexOf(protocol) < 0) {
-          delete ctx.browser.location
-        } else {
-          var url = {protocol: parsed.protocol, host: parsed.host}
-          ctx.browser.url = url
-          if (parsed.pathname) {
-            url.pathname = parsed.pathname
-          }
-          if (Object.keys(parsed.query).length > 0) {
-            url.query = parsed.query
-          }
-          if (parsed.hash) {
-            url.hash = parsed.hash
-          }
-        }
-      }
-      if (checkBrowserResponsiveness) {
-        if (!ctx.debug) {
-          ctx.debug = {}
-        }
-        ctx.debug.browserResponsivenessCounter = transaction.browserResponsivenessCounter
-        ctx.debug.browserResponsivenessInterval = browserResponsivenessInterval
-      }
+      opbeatBackend.setTransactionContextInfo(transaction)
     })
 
     var filterTransactions = transactionList.filter(function (tr) {

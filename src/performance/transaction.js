@@ -15,7 +15,7 @@ var Transaction = function (name, type, options) {
 
   this.contextInfo = {
     debug: {},
-    browser: {
+    url: {
       location: window.location.href
     }
   }

@@ -296,38 +296,34 @@ describe('OpbeatBackend', function () {
     expect(contextInfo.test).toEqual('test')
   })
 
-  it('should parse contextInfo.browser.location', function () {
+  it('should parse contextInfo.url.location', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     var tr = new Transaction('transaction', 'transaction')
     tr.end()
-    tr.contextInfo = {browser: {location: 'http://test.com/pathname?key=value#hash'}}
+    tr.contextInfo = {url: {location: 'http://test.com/pathname?key=value#hash'}}
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.transportData.length).toBe(1)
     var data = transportMock.transportData[0].data
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
-    expect(contextInfo.browser).toEqual(jasmine.objectContaining({
+    expect(contextInfo.url).toEqual(jasmine.objectContaining({
       location: 'http://test.com/pathname?key=value#hash',
-      url: {
-        protocol: 'http:',
-        host: 'test.com',
-        pathname: '/pathname',
-        query: {key: 'value'},
-        hash: '#hash'
-      }
+      base: 'http://test.com/pathname',
+      query: {key: 'value'},
+      hash: '#hash'
     }))
   })
 
-  it('should check for accepted protocols in contextInfo.browser.location', function () {
+  it('should check for accepted protocols in contextInfo.url.location', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     var tr = new Transaction('transaction', 'transaction')
     tr.end()
-    tr.contextInfo = {browser: {location: 'test://test.com'}}
+    tr.contextInfo = {url: {location: 'test://test.com'}}
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.transportData.length).toBe(1)
     var data = transportMock.transportData[0].data
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
-    expect(contextInfo.browser.location).toBeUndefined()
+    expect(contextInfo.url.location).toBeUndefined()
   })
 })

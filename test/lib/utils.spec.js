@@ -38,17 +38,17 @@ describe('lib/utils', function () {
 
     it('should parse absolute url', function () {
       var result = utils.parseUrl('http://test.com/path.js?param=value')
-      expect(result).toEqual({protocol: 'http', path: 'http://test.com/path.js',queryString: 'param=value', queryStringParsed: {param: 'value'},hash: ''})
+      expect(result).toEqual({protocol: 'http:', path: 'http://test.com/path.js',queryString: 'param=value', queryStringParsed: {param: 'value'},hash: ''})
     })
 
     it('should parse url with fragment part', function () {
       var result = utils.parseUrl('http://test.com/path?param=value#fragment')
-      expect(result).toEqual(jasmine.objectContaining({path: 'http://test.com/path',queryString: 'param=value', queryStringParsed: {param: 'value'},hash: 'fragment'}))
+      expect(result).toEqual(jasmine.objectContaining({path: 'http://test.com/path',queryString: 'param=value', queryStringParsed: {param: 'value'},hash: '#fragment'}))
     })
 
     it('should parse url with fragment before query string', function () {
       var result = utils.parseUrl('http://test.com/path#fragment?param=value')
-      expect(result).toEqual(jasmine.objectContaining({path: 'http://test.com/path',queryString: '', queryStringParsed: {},hash: 'fragment?param=value'}))
+      expect(result).toEqual(jasmine.objectContaining({path: 'http://test.com/path',queryString: '', queryStringParsed: {},hash: '#fragment?param=value'}))
     })
 
     it('should parse url with leading &', function () {
