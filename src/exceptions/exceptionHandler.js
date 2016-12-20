@@ -1,10 +1,10 @@
 var stackTrace = require('./stacktrace')
-var frames = require('./frames')
 
-var ExceptionHandler = function (opbeatBackend, config, logger) {
+var ExceptionHandler = function (opbeatBackend, config, logger, stackFrameService) {
   this._opbeatBackend = opbeatBackend
   this._config = config
   this._logger = logger
+  this._stackFrameService = stackFrameService
 }
 
 ExceptionHandler.prototype.install = function () {
@@ -59,12 +59,12 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
   var exceptionHandler = this
   return resolveStackFrames.then(function (stackFrames) {
     exception.stack = stackFrames || []
-    return frames.stackInfoToOpbeatException(exception).then(function (exception) {
-      var data = frames.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
+    return exceptionHandler._stackFrameService.stackInfoToOpbeatException(exception).then(function (exception) {
+      var data = exceptionHandler._stackFrameService.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
       exceptionHandler._opbeatBackend.sendError(data)
     })
   })['catch'](function (error) {
-    exceptionHandler._logger.debug(error)
+    exceptionHandler._logger.warn(error)
   })
 }
 

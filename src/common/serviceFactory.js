@@ -5,6 +5,8 @@ var Config = require('../lib/config')
 var utils = require('../lib/utils')
 var transport = require('../lib/transport')
 var ExceptionHandler = require('../exceptions/exceptionHandler')
+var StackFrameService = require('../exceptions/stackFrameService')
+
 var PerformanceServiceContainer = require('../performance/serviceContainer')
 
 function ServiceFactory () {
@@ -61,10 +63,20 @@ ServiceFactory.prototype.getExceptionHandler = function () {
   if (utils.isUndefined(this.services['ExceptionHandler'])) {
     var logger = this.getLogger()
     var configService = this.getConfigService()
-    var exceptionHandler = new ExceptionHandler(this.getOpbeatBackend(), configService, logger)
+    var exceptionHandler = new ExceptionHandler(this.getOpbeatBackend(), configService, logger, this.getStackFrameService())
     this.services['ExceptionHandler'] = exceptionHandler
   }
   return this.services['ExceptionHandler']
+}
+
+ServiceFactory.prototype.getStackFrameService = function () {
+  if (utils.isUndefined(this.services['StackFrameService'])) {
+    var logger = this.getLogger()
+    var configService = this.getConfigService()
+    var stackFrameService = new StackFrameService(configService, logger)
+    this.services['StackFrameService'] = stackFrameService
+  }
+  return this.services['StackFrameService']
 }
 
 ServiceFactory.prototype.getPerformanceServiceContainer = function () {
