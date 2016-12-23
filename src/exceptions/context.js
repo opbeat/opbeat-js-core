@@ -69,7 +69,7 @@ module.exports = {
 
           // Don't generate contexts if source is minified
           if (isMinified) {
-            return reject()
+            return reject('abort generating contexts, source is minified')
           }
 
           // Pre context

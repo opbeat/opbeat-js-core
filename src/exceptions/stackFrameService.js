@@ -60,7 +60,8 @@ StackFrameService.prototype.buildOpbeatFrame = function buildOpbeatFrame (stack)
       'colno': stack.columnNumber,
       'function': stack.functionName || '<anonymous>',
       'abs_path': stack.fileName,
-      'in_app': this.isFileInApp(filePath)
+      'in_app': this.isFileInApp(filePath),
+      'debug': []
     }
 
     // Detect Sourcemaps
@@ -69,17 +70,19 @@ StackFrameService.prototype.buildOpbeatFrame = function buildOpbeatFrame (stack)
     sourceMapResolver.then(function (sourceMapUrl) {
       frame.sourcemap_url = sourceMapUrl
       resolve(frame)
-    }, function () {
+    }, function (reason) {
       // // Resolve contexts if no source map
       var filePath = this.cleanFilePath(stack.fileName)
       var contextsResolver = context.getExceptionContexts(filePath, stack.lineNumber)
 
+      frame.debug.push(reason)
       contextsResolver.then(function (contexts) {
         frame.pre_context = contexts.preContext
         frame.context_line = contexts.contextLine
         frame.post_context = contexts.postContext
         resolve(frame)
-      })['catch'](function () {
+      })['catch'](function (reason) {
+        frame.debug.push(reason)
         resolve(frame)
       })
     }.bind(this))
