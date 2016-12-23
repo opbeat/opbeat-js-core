@@ -23,12 +23,17 @@ describe('ExceptionHandler', function () {
     spyOn(logger, 'warn').and.callThrough()
   })
   it('should process errors', function (done) {
-    exceptionHandler.processError(new Error())
-      .then(function () {
-        expect(logger.warn).not.toHaveBeenCalled()
-        done()
-      }, function (reason) {
-        fail(reason)
-      })
+    // in IE 10, Errors are given a stack once they're thrown.
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      exceptionHandler.processError(error)
+        .then(function () {
+          expect(logger.warn).not.toHaveBeenCalled()
+          done()
+        }, function (reason) {
+          fail(reason)
+        })
+    }
   })
 })

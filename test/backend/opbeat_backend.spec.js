@@ -343,7 +343,12 @@ describe('OpbeatBackend', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     expect(config.isValid()).toBe(true)
     var exceptionHandler = serviceFactory.getExceptionHandler()
-    var promise = exceptionHandler.processError(new Error('unittest error'))
+    // in IE 10, Errors are given a stack once they're thrown.
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      var promise = exceptionHandler.processError(error)
+    }
     promise.then(function () {
       expect(transportMock.transportData.length).toBe(1)
       var errorData = transportMock.transportData[0]
