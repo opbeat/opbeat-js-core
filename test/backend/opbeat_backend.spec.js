@@ -1,34 +1,46 @@
 var Config = require('../../src/lib/config')
 var OpbeatBackend = require('../../src/backend/opbeat_backend')
-var logger = Object.create(require('loglevel'))
 
 var Transaction = require('../../src/performance/transaction')
+var ServiceFactory = require('../../src/common/serviceFactory')
 
 function TransportMock () {
   this.transportData = []
   this.sendTransaction = function (data, headers) {
     this.transportData.push({data: data, headers: headers})
   }
-  this.sendError = function () {}
+  this.sendError = function (data, headers) {
+    this.transportData.push({data: data,headers: headers})
+  }
 }
 
 describe('OpbeatBackend', function () {
   var config
   var transportMock
   var opbeatBackend
+  var serviceFactory
+  var logger
   beforeEach(function () {
+    serviceFactory = new ServiceFactory()
     config = Object.create(Config)
     config.init()
+    serviceFactory.services['ConfigService'] = config
+
+    logger = serviceFactory.getLogger()
+
     transportMock = new TransportMock()
+    serviceFactory.services['Transport'] = transportMock
+
     spyOn(transportMock, 'sendTransaction').and.callThrough()
-    spyOn(transportMock, 'sendError')
+    spyOn(transportMock, 'sendError').and.callThrough()
     spyOn(logger, 'warn')
     spyOn(logger, 'debug')
-    opbeatBackend = new OpbeatBackend(transportMock, logger, config)
+    opbeatBackend = serviceFactory.getOpbeatBackend()
   })
 
   it('should not send transctions when the list is empty', function () {
     config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    spyOn(logger, 'warn')
     expect(config.isValid()).toBe(true)
     opbeatBackend.sendTransactions([])
     expect(transportMock.sendTransaction).not.toHaveBeenCalled()
@@ -325,5 +337,20 @@ describe('OpbeatBackend', function () {
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
     expect(contextInfo.url.location).toBeUndefined()
+  })
+
+  it('should send file_errors', function (done) {
+    config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
+    expect(config.isValid()).toBe(true)
+    var exceptionHandler = serviceFactory.getExceptionHandler()
+    var promise = exceptionHandler.processError(new Error('unittest error'))
+    promise.then(function () {
+      expect(transportMock.transportData.length).toBe(1)
+      var errorData = transportMock.transportData[0]
+      expect(errorData.data.extra.debug.file_errors).toBeDefined()
+      done()
+    }, function () {
+      fail()
+    })
   })
 })

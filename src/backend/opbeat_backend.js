@@ -10,6 +10,16 @@ function OpbeatBackend (transport, logger, config) {
 OpbeatBackend.prototype.sendError = function (errorData) {
   if (this._config.isValid()) {
     errorData.stacktrace.frames = backendUtils.createValidFrames(errorData.stacktrace.frames)
+    if (!errorData.extra.debug) {
+      errorData.extra.debug = {}
+    }
+    var fileErrors = errorData.extra.debug.file_errors = {}
+    errorData.stacktrace.frames.forEach(function (frame) {
+      if (frame.debug && frame.debug.length > 0) {
+        fileErrors[frame.abs_path] = frame.debug.join(' - ')
+        delete frame.debug
+      }
+    })
     var headers = this.getHeaders()
     this._transport.sendError(errorData, headers)
   } else {
