@@ -1,5 +1,3 @@
-var frames = require('../exceptions/frames')
-var traceCache = require('./traceCache')
 var utils = require('../lib/utils')
 
 function Trace (transaction, signature, type, options) {
@@ -101,18 +99,8 @@ Trace.prototype.getFingerprint = function () {
 
 Trace.prototype.getTraceStackFrames = function (callback) {
   // Use callbacks instead of Promises to keep the stack
-  var key = this.getFingerprint()
-  var traceFrames = traceCache.get(key)
-  if (traceFrames) {
-    callback(traceFrames)
-  } else {
-    frames.getFramesForCurrent().then(function (traceFrames) {
-      traceCache.set(key, traceFrames)
-      callback(traceFrames)
-    })['catch'](function () {
-      callback(null)
-    })
-  }
+  // should use stacktrace.js to get stackframes raw data synchronously
+  callback()
 }
 
 module.exports = Trace
