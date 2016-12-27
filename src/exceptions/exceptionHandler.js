@@ -32,7 +32,8 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
     'type': error ? error.name : null,
     'fileurl': file || null,
     'lineno': line || null,
-    'colno': col || null
+    'colno': col || null,
+    'extra': error ? error['_opbeat_extra_context'] : undefined
   }
 
   if (!exception.type) {

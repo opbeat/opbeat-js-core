@@ -165,11 +165,8 @@ StackFrameService.prototype.processOpbeatException = function (exception, userCo
     machine: null
   }
 
-  data.extra = this.getBrowserSpecificMetadata()
-
-  if (extraContext) {
-    data.extra = utils.mergeObject(data.extra, extraContext)
-  }
+  var browserMetadata = this.getBrowserSpecificMetadata()
+  data.extra = utils.merge({}, browserMetadata, extraContext, exception.extra)
 
   this._logger.debug('opbeat.exceptions.processOpbeatException', data)
   return data
