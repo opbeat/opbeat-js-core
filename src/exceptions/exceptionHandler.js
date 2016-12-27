@@ -27,12 +27,15 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
     return
   }
 
+  var extraContext = error ? getProperties(error) : undefined // error ? error['_opbeat_extra_context'] : undefined
+
   var exception = {
     'message': error ? error.message : msg,
     'type': error ? error.name : null,
     'fileurl': file || null,
     'lineno': line || null,
-    'colno': col || null
+    'colno': col || null,
+    'extra': extraContext
   }
 
   if (!exception.type) {
@@ -66,6 +69,25 @@ ExceptionHandler.prototype._processError = function processError (error, msg, fi
   })['catch'](function (error) {
     exceptionHandler._logger.warn(error)
   })
+}
+
+function getProperties (err) {
+  var properties = {}
+  Object.keys(err).forEach(function (key) {
+    if (key === 'stack') return
+    var val = err[key]
+    if (val === null) return // null is typeof object and well break the switch below
+    switch (typeof val) {
+      case 'function':
+        return
+      case 'object':
+        // ignore all objects except Dates
+        if (typeof val.toISOString !== 'function') return
+        val = val.toISOString()
+    }
+    properties[key] = val
+  })
+  return properties
 }
 
 module.exports = ExceptionHandler
