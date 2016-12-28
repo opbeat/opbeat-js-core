@@ -23,7 +23,8 @@ function Config () {
       similarTraceThreshold: 0.05,
       captureInteractions: false,
       sendVerboseDebugInfo: false,
-      includeXHRQueryString: false
+      includeXHRQueryString: false,
+      capturePageLoad: false
     },
     libraryPathPattern: '(node_modules|bower_components|webpack)',
     context: {},

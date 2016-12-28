@@ -43,6 +43,8 @@ var Transaction = function (name, type, options) {
 
   this.duration = this._rootTrace.duration.bind(this._rootTrace)
   this.nextId = 0
+
+  this.isHardNavigation = false
 }
 
 Transaction.prototype.debugLog = function () {
