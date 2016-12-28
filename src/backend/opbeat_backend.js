@@ -1,5 +1,4 @@
 var backendUtils = require('./backend_utils')
-var captureHardNavigation = require('../performance/captureHardNavigation')
 var utils = require('../lib/utils')
 
 module.exports = OpbeatBackend
@@ -144,11 +143,6 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
   if (this._config.isValid()) {
     var browserResponsivenessInterval = opbeatBackend._config.get('performance.browserResponsivenessInterval')
     var checkBrowserResponsiveness = opbeatBackend._config.get('performance.checkBrowserResponsiveness')
-    var pageLoad = opbeatBackend._config.get('performance.pageLoad')
-
-    if (pageLoad) {
-      transactionList.forEach(captureHardNavigation);
-    }
 
     transactionList.forEach(function (transaction) {
       transaction.traces.sort(function (traceA, traceB) {
@@ -163,7 +157,7 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
     })
 
     var filterTransactions = transactionList.filter(function (tr) {
-      if (checkBrowserResponsiveness) {
+      if (checkBrowserResponsiveness && !tr.isHardNavigation) {
         var buffer = opbeatBackend._config.get('performance.browserResponsivenessBuffer')
 
         var duration = tr._rootTrace.duration()

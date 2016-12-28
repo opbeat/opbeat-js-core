@@ -2,6 +2,8 @@ var Transaction = require('./transaction')
 var utils = require('../lib/utils')
 var Subscription = require('../common/subscription')
 
+var captureHardNavigation = require('./captureHardNavigation')
+
 function TransactionService (zoneService, logger, config, opbeatBackend) {
   this._config = config
   if (typeof config === 'undefined') {
@@ -22,6 +24,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this._subscription = new Subscription()
 
   var transactionService = this
+  this._alreadyCapturedPageLoad = false
 
   function onBeforeInvokeTask (task) {
     if (task.source === 'XMLHttpRequest.send' && task.trace && !task.trace.ended) {
@@ -160,6 +163,13 @@ TransactionService.prototype.startTransaction = function (name, type) {
     var p = tr.donePromise
     p.then(function (t) {
       self._logger.debug('TransactionService transaction finished', tr)
+      var capturePageLoad = self._config.get('performance.capturePageLoad')
+      if (capturePageLoad && !self._alreadyCapturedPageLoad) {
+        tr.isHardNavigation = true
+        captureHardNavigation(tr)
+        self._alreadyCapturedPageLoad = true
+      }
+
       self.add(tr)
       self._subscription.applyAll(self, [tr])
 

@@ -159,4 +159,25 @@ describe('TransactionService', function () {
     zoneServiceMock.spec.onInvokeTask(task)
     expect(task.trace.ended).toBe(true)
   })
+
+  it('should capture page load on first transaction', function (done) {
+    config.set('performance.enable', true)
+    config.set('performance.capturePageLoad', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var tr1 = transactionService.startTransaction('transaction1', 'transaction')
+    expect(tr1.isHardNavigation).toBe(false)
+    tr1.detectFinish()
+    tr1.donePromise.then(function () {
+      expect(tr1.isHardNavigation).toBe(true)
+    })
+
+    var tr2 = transactionService.startTransaction('transaction2', 'transaction')
+    expect(tr2.isHardNavigation).toBe(false)
+    tr2.detectFinish()
+    tr2.donePromise.then(function () {
+      expect(tr2.isHardNavigation).toBe(false)
+      done()
+    })
+  })
 })
