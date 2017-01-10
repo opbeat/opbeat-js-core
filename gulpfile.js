@@ -217,7 +217,8 @@ gulp.task('test:launchsauceconnect', function (done) {
   var config = {
     username: saucelabsConfig.user,
     accessKey: saucelabsConfig.key,
-    logger: console.log
+    logger: console.log,
+    noSslBumpDomains: 'all'
   }
 
   var tryConnect = function (maxAttempts, currAttempts, done) {
