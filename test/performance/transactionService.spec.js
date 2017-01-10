@@ -171,6 +171,9 @@ describe('TransactionService', function () {
     tr1.donePromise.then(function () {
       expect(tr1.isHardNavigation).toBe(true)
     })
+    tr1.traces.forEach(function (t) {
+      expect(t.duration()).toBeLessThan(5 * 60 * 1000)
+    })
 
     var tr2 = transactionService.startTransaction('transaction2', 'transaction')
     expect(tr2.isHardNavigation).toBe(false)
