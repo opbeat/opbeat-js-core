@@ -141,9 +141,11 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
   var tr = new Transaction(name, 'page-load', perfOptions)
 
   tr.donePromise.then(function () {
-    self.capturePageLoadMetrics(tr)
-    self.add(tr)
-    self._subscription.applyAll(self, [tr])
+    var captured = self.capturePageLoadMetrics(tr)
+    if (captured) {
+      self.add(tr)
+      self._subscription.applyAll(self, [tr])
+    }
   })
   tr.detectFinish()
 }
@@ -155,6 +157,7 @@ TransactionService.prototype.capturePageLoadMetrics = function (tr) {
     tr.isHardNavigation = true
     captureHardNavigation(tr)
     self._alreadyCapturedPageLoad = true
+    return true
   }
 }
 
