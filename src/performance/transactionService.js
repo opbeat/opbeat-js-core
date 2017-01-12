@@ -135,6 +135,29 @@ TransactionService.prototype.startCounter = function (transaction) {
   })
 }
 
+TransactionService.prototype.sendPageLoadMetrics = function (name) {
+  var self = this
+  var perfOptions = this._config.get('performance')
+  var tr = new Transaction(name, 'page-load', perfOptions)
+
+  tr.donePromise.then(function () {
+    self.capturePageLoadMetrics(tr)
+    self.add(tr)
+    self._subscription.applyAll(self, [tr])
+  })
+  tr.detectFinish()
+}
+
+TransactionService.prototype.capturePageLoadMetrics = function (tr) {
+  var self = this
+  var capturePageLoad = self._config.get('performance.capturePageLoad')
+  if (capturePageLoad && !self._alreadyCapturedPageLoad) {
+    tr.isHardNavigation = true
+    captureHardNavigation(tr)
+    self._alreadyCapturedPageLoad = true
+  }
+}
+
 TransactionService.prototype.startTransaction = function (name, type) {
   var self = this
   var perfOptions = this._config.get('performance')
@@ -163,12 +186,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
     var p = tr.donePromise
     p.then(function (t) {
       self._logger.debug('TransactionService transaction finished', tr)
-      var capturePageLoad = self._config.get('performance.capturePageLoad')
-      if (capturePageLoad && !self._alreadyCapturedPageLoad) {
-        tr.isHardNavigation = true
-        captureHardNavigation(tr)
-        self._alreadyCapturedPageLoad = true
-      }
+      self.capturePageLoadMetrics(tr)
 
       self.add(tr)
       self._subscription.applyAll(self, [tr])
