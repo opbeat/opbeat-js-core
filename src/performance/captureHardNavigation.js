@@ -17,7 +17,6 @@ module.exports = function captureHardNavigation (transaction) {
 
     transaction._rootTrace._start = transaction._start = 0
     transaction.type = 'page-load'
-    transaction.name += ' (initial page load)' // temporary until we support transaction types
     var traceThreshold = 5 * 60 * 1000 // 5 minutes
     for (var i = 0; i < eventPairs.length; i++) {
       // var transactionStart = eventPairs[0]
