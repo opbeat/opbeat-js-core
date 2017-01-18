@@ -1,4 +1,5 @@
 var stackTrace = require('./stacktrace')
+var utils = require('../lib/utils')
 
 var ExceptionHandler = function (opbeatBackend, config, logger, stackFrameService) {
   this._opbeatBackend = opbeatBackend
@@ -9,7 +10,12 @@ var ExceptionHandler = function (opbeatBackend, config, logger, stackFrameServic
 
 ExceptionHandler.prototype.install = function () {
   window.onerror = function (msg, file, line, col, error) {
-    this._processError(error, msg, file, line, col)
+    var options = {
+      eventObject: {
+        msg: msg, file: file, line: line, col: col
+      }
+    }
+    this._processError(error, options)
   }.bind(this)
 }
 
@@ -17,17 +23,25 @@ ExceptionHandler.prototype.uninstall = function () {
   window.onerror = null
 }
 
-ExceptionHandler.prototype.processError = function (err) {
-  return this._processError(err)
+ExceptionHandler.prototype.processError = function (err, options) {
+  return this._processError(err, options)
 }
 
-ExceptionHandler.prototype._processError = function processError (error, msg, file, line, col) {
+ExceptionHandler.prototype._processError = function processError (error, options) {
+  var eo = options && options.eventObject || {}
+  var msg = eo.msg
+  var file = eo.file
+  var line = eo.line
+  var col = eo.col
   if (msg === 'Script error.' && !file) {
     // ignoring script errors: See https://github.com/getsentry/raven-js/issues/41
     return
   }
 
   var extraContext = error ? getProperties(error) : undefined // error ? error['_opbeat_extra_context'] : undefined
+  if (options && options.extra) {
+    extraContext = utils.merge({}, extraContext, options.extra)
+  }
 
   var exception = {
     'message': error ? error.message : msg,

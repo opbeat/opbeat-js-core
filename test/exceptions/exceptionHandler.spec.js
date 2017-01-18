@@ -50,4 +50,36 @@ describe('ExceptionHandler', function () {
         })
     }
   })
+
+  it('should capture extra data', function () {
+    config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    expect(config.isValid()).toBe(true)
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      // error['_opbeat_extra_context'] = {test: 'hamid'}
+      error.test = 'hamid'
+      error.aDate = new Date('2017-01-12T00:00:00.000Z')
+      var obj = {test: 'test'}
+      obj.obj = obj
+      error.anObject = obj
+      error.aFunction = function noop () {}
+      error.null = null
+      exceptionHandler.processError(error, {extra: {extraObject: {test: 'test'}}})
+        .then(function () {
+          expect(logger.warn).not.toHaveBeenCalled()
+          expect(transport.errors.length).toBe(1)
+          var errorData = transport.errors[0]
+          expect(errorData.data.extra.test).toBe('hamid')
+          expect(errorData.data.extra.aDate).toBe('2017-01-12T00:00:00.000Z') // toISOString()
+          expect(errorData.data.extra.anObject).toBeUndefined()
+          expect(errorData.data.extra.aFunction).toBeUndefined()
+          expect(errorData.data.extra.null).toBeUndefined()
+          expect(errorData.data.extra.extraObject).toEqual({test: 'test'})
+          done()
+        }, function (reason) {
+          fail(reason)
+        })
+    }
+  })
 })
