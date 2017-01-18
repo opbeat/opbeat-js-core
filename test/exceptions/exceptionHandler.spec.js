@@ -51,7 +51,7 @@ describe('ExceptionHandler', function () {
     }
   })
 
-  it('should capture extra data', function () {
+  it('should capture extra data', function (done) {
     config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
     expect(config.isValid()).toBe(true)
     try {
@@ -67,7 +67,6 @@ describe('ExceptionHandler', function () {
       error.null = null
       exceptionHandler.processError(error, {extra: {extraObject: {test: 'test'}}})
         .then(function () {
-          expect(logger.warn).not.toHaveBeenCalled()
           expect(transport.errors.length).toBe(1)
           var errorData = transport.errors[0]
           expect(errorData.data.extra.test).toBe('hamid')
