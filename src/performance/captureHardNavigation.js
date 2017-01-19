@@ -10,6 +10,12 @@ var eventPairs = [
   ['loadEventStart', 'loadEventEnd', '"load" event handling']
 ]
 
+var traceThreshold = 5 * 60 * 1000 // 5 minutes
+function isValidTrace (transaction, trace) {
+  var d = trace.duration()
+  return (d < traceThreshold && d > 0 && trace._start <= transaction._rootTrace._end && trace._end <= transaction._rootTrace._end)
+}
+
 module.exports = function captureHardNavigation (transaction) {
   if (transaction.isHardNavigation && window.performance && window.performance.timing) {
     var baseTime = window.performance.timing.navigationStart
@@ -17,7 +23,6 @@ module.exports = function captureHardNavigation (transaction) {
 
     transaction._rootTrace._start = transaction._start = 0
     transaction.type = 'page-load'
-    var traceThreshold = 5 * 60 * 1000 // 5 minutes
     for (var i = 0; i < eventPairs.length; i++) {
       // var transactionStart = eventPairs[0]
       var start = timings[eventPairs[i][0]]
@@ -30,8 +35,7 @@ module.exports = function captureHardNavigation (transaction) {
         trace.end()
         trace._end = timings[eventPairs[i][1]] - baseTime
         trace.calcDiff()
-        var d = trace.duration()
-        if (d > traceThreshold || d < 0) {
+        if (!isValidTrace(transaction, trace)) {
           transaction.traces.splice(transaction.traces.indexOf(trace), 1)
         }
       }
@@ -56,6 +60,9 @@ module.exports = function captureHardNavigation (transaction) {
           trace.end()
           trace._end = entry.responseEnd
           trace.calcDiff()
+          if (!isValidTrace(transaction, trace)) {
+            transaction.traces.splice(transaction.traces.indexOf(trace), 1)
+          }
         }
       }
     }
