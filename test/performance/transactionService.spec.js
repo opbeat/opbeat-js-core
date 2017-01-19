@@ -183,4 +183,16 @@ describe('TransactionService', function () {
       done()
     })
   })
+
+  it('should sendPageLoadMetrics', function (done) {
+    config.set('performance.enable', true)
+    config.set('performance.capturePageLoad', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    var tr = transactionService.sendPageLoadMetrics('test')
+
+    tr.donePromise.then(function () {
+      expect(tr.isHardNavigation).toBe(true)
+      done()
+    })
+  })
 })

@@ -148,6 +148,7 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
     }
   })
   tr.detectFinish()
+  return tr
 }
 
 TransactionService.prototype.capturePageLoadMetrics = function (tr) {
