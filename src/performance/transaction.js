@@ -15,6 +15,7 @@ var Transaction = function (name, type, options) {
 
   this.contextInfo = {
     debug: {},
+    _metrics: {},
     url: {
       location: window.location.href
     }
@@ -53,6 +54,10 @@ Transaction.prototype.debugLog = function () {
     messages.unshift(Date.now().toString())
     this.contextInfo.debug.log.push(messages.join(' - '))
   }
+}
+
+Transaction.prototype.addMetrics = function (obj) {
+  this.contextInfo._metrics = utils.merge(this.contextInfo._metrics, obj)
 }
 
 Transaction.prototype.setDebugData = function setDebugData (key, value) {
