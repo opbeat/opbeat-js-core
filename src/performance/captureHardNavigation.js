@@ -10,6 +10,10 @@ var eventPairs = [
   ['loadEventStart', 'loadEventEnd', '"load" event handling']
 ]
 
+var navigationTimingKeys = [
+  'navigationStart', 'unloadEventStart', 'unloadEventEnd', 'redirectStart', 'redirectEnd', 'fetchStart', 'domainLookupStart', 'domainLookupEnd', 'connectStart',
+  'connectEnd', 'secureConnectionStart', 'requestStart', 'responseStart', 'responseEnd', 'domLoading', 'domInteractive', 'domContentLoadedEventStart', 'domContentLoadedEventEnd', 'domComplete', 'loadEventStart', 'loadEventEnd']
+
 var traceThreshold = 5 * 60 * 1000 // 5 minutes
 function isValidTrace (transaction, trace) {
   var d = trace.duration()
@@ -66,9 +70,19 @@ module.exports = function captureHardNavigation (transaction) {
         }
       }
     }
-
     transaction._adjustStartToEarliestTrace()
     transaction._adjustEndToLatestTrace()
+
+    var metrics = {
+      timeToComplete: transaction._rootTrace._end
+    }
+    navigationTimingKeys.forEach(function (timingKey) {
+      var m = timings[timingKey]
+      if (m) {
+        metrics[timingKey] = m - baseTime
+      }
+    })
+    transaction.addMetrics(metrics)
   }
   return 0
 }
