@@ -18,6 +18,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this.nextId = 1
 
   this.taskMap = {}
+  this.metrics = {}
 
   this._queue = []
 
@@ -155,6 +156,7 @@ TransactionService.prototype.capturePageLoadMetrics = function (tr) {
   var self = this
   var capturePageLoad = self._config.get('performance.capturePageLoad')
   if (capturePageLoad && !self._alreadyCapturedPageLoad) {
+    tr.addMetrics(self.metrics)
     tr.isHardNavigation = true
     captureHardNavigation(tr)
     self._alreadyCapturedPageLoad = true
