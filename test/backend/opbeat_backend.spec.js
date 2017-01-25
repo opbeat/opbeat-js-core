@@ -299,7 +299,7 @@ describe('OpbeatBackend', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     var tr = new Transaction('transaction', 'transaction')
     tr.end()
-    tr.contextInfo = {test: 'test'}
+    tr.addContextInfo({test: 'test'})
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.transportData.length).toBe(1)
     var data = transportMock.transportData[0].data
@@ -312,7 +312,7 @@ describe('OpbeatBackend', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     var tr = new Transaction('transaction', 'transaction')
     tr.end()
-    tr.contextInfo = {url: {location: 'http://test.com/pathname?key=value#hash'}}
+    tr.addContextInfo({url: {location: 'http://test.com/pathname?key=value#hash'}})
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.transportData.length).toBe(1)
     var data = transportMock.transportData[0].data
@@ -330,7 +330,7 @@ describe('OpbeatBackend', function () {
     config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
     var tr = new Transaction('transaction', 'transaction')
     tr.end()
-    tr.contextInfo = {url: {location: 'test://test.com'}}
+    tr.addContextInfo({url: {location: 'test://test.com'}})
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.transportData.length).toBe(1)
     var data = transportMock.transportData[0].data

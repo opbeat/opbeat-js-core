@@ -135,12 +135,12 @@ describe('transaction.Transaction', function () {
 
   it('should store debug.log in contextInfo', function () {
     var tr = new Transaction('/', 'transaction', {sendVerboseDebugInfo: true})
-    expect(tr.contextInfo.debug.log.length).toBeGreaterThan(0)
+    expect(tr.contextInfo._debug.log.length).toBeGreaterThan(0)
   })
 
-  it('should not create log on contextInfo.debug if sendVerboseDebugInfo is not true', function () {
+  it('should not create log on contextInfo._debug if sendVerboseDebugInfo is not true', function () {
     var tr = new Transaction('/', 'transaction')
-    expect(tr.contextInfo.debug.log).toBeUndefined()
+    expect(tr.contextInfo._debug.log).toBeUndefined()
   })
 
   it('should redefine transaction', function () {

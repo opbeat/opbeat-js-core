@@ -94,7 +94,7 @@ TransactionService.prototype.createTransaction = function (name, type, options) 
   }
 
   var tr = new Transaction(name, type, perfOptions)
-  tr.contextInfo.debug.zone = this._zoneService.getCurrentZone().name
+  tr.setDebugData('zone', this._zoneService.getCurrentZone().name)
   this._zoneService.set('transaction', tr)
   if (perfOptions.checkBrowserResponsiveness) {
     this.startCounter(tr)

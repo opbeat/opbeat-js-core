@@ -102,7 +102,7 @@ OpbeatBackend.prototype.setTransactionContextInfo = function setTransactionConte
 
   var context = opbeatBackend._config.get('context')
   if (context) {
-    transaction.contextInfo = utils.merge(transaction.contextInfo || {}, context)
+    transaction.addContextInfo(context)
   }
 
   var ctx = transaction.contextInfo
@@ -127,18 +127,16 @@ OpbeatBackend.prototype.setTransactionContextInfo = function setTransactionConte
       }
     }
   }
-  if (!ctx.system) {
-    ctx.system = {}
-  }
-  ctx.system.opbeat = opbeatBackend._config.getAgentName()
 
-  if (!ctx.debug) {
-    ctx.debug = {}
-  }
+  transaction.addContextInfo({
+    system: {
+      agent: opbeatBackend._config.getAgentName()
+    }
+  })
 
   if (checkBrowserResponsiveness) {
-    ctx.debug.browserResponsivenessCounter = transaction.browserResponsivenessCounter
-    ctx.debug.browserResponsivenessInterval = browserResponsivenessInterval
+    transaction.setDebugData('browserResponsivenessCounter', transaction.browserResponsivenessCounter)
+    transaction.setDebugData('browserResponsivenessInterval', browserResponsivenessInterval)
   }
 }
 

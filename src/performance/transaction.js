@@ -14,14 +14,14 @@ var Transaction = function (name, type, options) {
   }
 
   this.contextInfo = {
-    debug: {},
+    _debug: {},
     _metrics: {},
     url: {
       location: window.location.href
     }
   }
   if (this._options.sendVerboseDebugInfo) {
-    this.contextInfo.debug.log = []
+    this.contextInfo._debug.log = []
     this.debugLog('Transaction', name, type)
   }
 
@@ -52,16 +52,20 @@ Transaction.prototype.debugLog = function () {
   if (this._options.sendVerboseDebugInfo) {
     var messages = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments))
     messages.unshift(Date.now().toString())
-    this.contextInfo.debug.log.push(messages.join(' - '))
+    this.contextInfo._debug.log.push(messages.join(' - '))
   }
+}
+
+Transaction.prototype.addContextInfo = function (obj) {
+  utils.merge(this.contextInfo, obj)
+}
+
+Transaction.prototype.setDebugData = function setDebugData (key, value) {
+  this.contextInfo._debug[key] = value
 }
 
 Transaction.prototype.addMetrics = function (obj) {
   this.contextInfo._metrics = utils.merge(this.contextInfo._metrics, obj)
-}
-
-Transaction.prototype.setDebugData = function setDebugData (key, value) {
-  this.contextInfo.debug[key] = value
 }
 
 Transaction.prototype.redefine = function (name, type, options) {
@@ -132,7 +136,7 @@ Transaction.prototype.addTask = function (taskId) {
 
 Transaction.prototype.removeTask = function (taskId) {
   this.debugLog('removeTask', taskId)
-  this.contextInfo.debug.lastRemovedTask = taskId
+  this.setDebugData('lastRemovedTask', taskId)
   delete this._scheduledTasks[taskId]
 }
 
