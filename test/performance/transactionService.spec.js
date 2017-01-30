@@ -194,5 +194,13 @@ describe('TransactionService', function () {
       expect(tr.isHardNavigation).toBe(true)
       done()
     })
+
+    var zoneTr = new Transaction('transaction', 'transaction')
+    zoneServiceMock.set('transaction', zoneTr)
+
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    var pageLoadTr = transactionService.sendPageLoadMetrics('new tr')
+
+    expect(pageLoadTr).toBe(zoneTr)
   })
 })

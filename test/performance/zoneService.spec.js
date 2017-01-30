@@ -326,6 +326,10 @@ describe('ZoneService', function () {
       expect(zoneService.get('testKey')).toBe('testValue')
       expect(window.Zone.current.get('testKey')).toBe('testValue')
     })
+
+    zoneService.setOnOpbeatZone('opbeatKey', 'opbeatValue')
+    var opbeatValue = zoneService.getFromOpbeatZone('opbeatKey')
+    expect(opbeatValue).toBe('opbeatValue')
   })
 
   it('should test for opbeat zone', function () {

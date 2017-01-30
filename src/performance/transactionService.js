@@ -139,7 +139,15 @@ TransactionService.prototype.startCounter = function (transaction) {
 TransactionService.prototype.sendPageLoadMetrics = function (name) {
   var self = this
   var perfOptions = this._config.get('performance')
-  var tr = new Transaction(name, 'page-load', perfOptions)
+  var tr
+
+  tr = this._zoneService.getFromOpbeatZone('transaction')
+
+  if (tr) {
+    tr.redefine(name, 'page-load', perfOptions)
+  } else {
+    tr = new Transaction(name, 'page-load', perfOptions)
+  }
 
   tr.donePromise.then(function () {
     var captured = self.capturePageLoadMetrics(tr)

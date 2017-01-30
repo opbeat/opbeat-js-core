@@ -14,6 +14,9 @@ function ZoneServiceMock () {
   this.set = function (key, value) {
     this.zone[key] = value
   }
+  this.getFromOpbeatZone = function (key) {
+    return this.get(key)
+  }
   this.runOuter = function (fn) {
     return fn()
   }

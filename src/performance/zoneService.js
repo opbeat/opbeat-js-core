@@ -185,6 +185,13 @@ ZoneService.prototype.get = function (key) {
   return window.Zone.current.get(key)
 }
 
+ZoneService.prototype.getFromOpbeatZone = function (key) {
+  return this.zone.get(key)
+}
+ZoneService.prototype.setOnOpbeatZone = function (key, value) {
+  this.zone._properties[key] = value
+}
+
 ZoneService.prototype.getCurrentZone = function () {
   return window.Zone.current
 }
