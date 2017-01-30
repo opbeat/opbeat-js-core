@@ -22,7 +22,7 @@ function isValidTrace (transaction, trace) {
 
 module.exports = function captureHardNavigation (transaction) {
   if (transaction.isHardNavigation && window.performance && window.performance.timing) {
-    var baseTime = window.performance.timing.navigationStart
+    var baseTime = window.performance.timing.fetchStart
     var timings = window.performance.timing
 
     transaction._rootTrace._start = transaction._start = 0
