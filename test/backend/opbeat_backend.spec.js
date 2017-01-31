@@ -352,7 +352,7 @@ describe('OpbeatBackend', function () {
     promise.then(function () {
       expect(transportMock.transportData.length).toBe(1)
       var errorData = transportMock.transportData[0]
-      expect(errorData.data.extra.debug.file_errors).toBeDefined()
+      expect(errorData.data.extra.debug).toBeUndefined()
       done()
     }, function () {
       fail()

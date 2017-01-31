@@ -1,7 +1,4 @@
-// var logger = require('../lib/logger')
-// var config = require('../lib/config')
 var utils = require('../lib/utils')
-var context = require('./context')
 var stackTrace = require('./stacktrace')
 
 var promiseSequence = function (tasks) {
@@ -64,28 +61,7 @@ StackFrameService.prototype.buildOpbeatFrame = function buildOpbeatFrame (stack)
       'debug': []
     }
 
-    // Detect Sourcemaps
-    var sourceMapResolver = context.getFileSourceMapUrl(filePath)
-
-    sourceMapResolver.then(function (sourceMapUrl) {
-      frame.sourcemap_url = sourceMapUrl
-      resolve(frame)
-    }, function (reason) {
-      // // Resolve contexts if no source map
-      var filePath = this.cleanFilePath(stack.fileName)
-      var contextsResolver = context.getExceptionContexts(filePath, stack.lineNumber)
-
-      frame.debug.push(reason)
-      contextsResolver.then(function (contexts) {
-        frame.pre_context = contexts.preContext
-        frame.context_line = contexts.contextLine
-        frame.post_context = contexts.postContext
-        resolve(frame)
-      })['catch'](function (reason) {
-        frame.debug.push(reason)
-        resolve(frame)
-      })
-    }.bind(this))
+    resolve(frame)
   }.bind(this))
 }
 
