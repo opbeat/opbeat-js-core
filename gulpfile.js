@@ -272,13 +272,18 @@ function sequenceSucceeded (done) {
 }
 
 gulp.task('test:unit:sauce', function (done) {
-  runSequence(['test:launchsauceconnect'], 'test', function (err) {
+  var sequenceArgs = ['test', function (err) {
     if (err) {
       return taskFailed(err)
     } else {
       return sequenceSucceeded(done)
     }
-  })
+  }]
+  var isSauce = process.env.MODE && process.env.MODE.startsWith('saucelabs')
+  if (isSauce) {
+    sequenceArgs.unshift(['test:launchsauceconnect'])
+  }
+  runSequence.apply(this, sequenceArgs)
 })
 
 gulp.task('default', taskListing)
