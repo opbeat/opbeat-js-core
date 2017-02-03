@@ -1,7 +1,7 @@
 var utils = require('../../lib/utils')
 var patchObject = require('../patchUtils').patchObject
 var patchPromise = require('./patchPromise')
-var noop = function () { }
+var noop = function () {}
 var patchList = ['json', 'text', 'formData', 'blob', 'arrayBuffer', 'redirect', 'error']
 
 function patchResponse (transactionService, args, trace) {
@@ -20,12 +20,11 @@ function patchResponse (transactionService, args, trace) {
   }
 }
 
-function patchFetch () {
+function patchFetch (serviceContainer) {
   if (window.fetch) {
     patchObject(window, 'fetch', function (delegate) {
       return function (self, args) { // url, urlOpts
-        var serviceContainer
-        if (!(serviceContainer = utils.opbeatGlobal()) || args.length < 1) {
+        if (args.length < 1) {
           return delegate.apply(self, args)
         }
         var transactionService = serviceContainer.services.transactionService
@@ -35,12 +34,14 @@ function patchFetch () {
 
         var promise = delegate.apply(self, args)
 
-        promise.then(function () {
-          trace.end()
-          transactionService.detectFinish()
-        })
+        if (trace) {
+          promise.then(function () {
+            trace.end()
+            transactionService.detectFinish()
+          })
 
-        patchPromise(transactionService, promise, trace, patchResponse)
+          patchPromise(transactionService, promise, trace, patchResponse)
+        }
         return promise
       }
     })

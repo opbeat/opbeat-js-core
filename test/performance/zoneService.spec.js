@@ -1,7 +1,7 @@
 var ZoneService = require('../../src/performance/zoneService')
 var ServiceContainer = require('../../src/performance/serviceContainer')
 var ServiceFactory = require('../../src/common/serviceFactory')
-var patchCommon = require('../../src/common/patchCommon')
+var patchXhr = require('../../src/common/patches/xhrPatch')
 
 var logger = require('loglevel')
 
@@ -9,7 +9,7 @@ describe('ZoneService', function () {
   var zoneService
   var originalTimeout
   var serviceContainer = new ServiceContainer(new ServiceFactory())
-  patchCommon(serviceContainer)
+  patchXhr(serviceContainer)
 
   beforeEach(function () {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL

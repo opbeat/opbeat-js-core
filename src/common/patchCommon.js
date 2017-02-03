@@ -3,7 +3,7 @@ var patchFetch = require('./patches/fetchPatch').patchFetch
 
 function patchCommon (serviceContainer) {
   patchXMLHttpRequest(serviceContainer)
-  patchFetch()
+  patchFetch(serviceContainer)
 }
 
 module.exports = patchCommon
