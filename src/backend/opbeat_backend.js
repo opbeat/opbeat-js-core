@@ -176,6 +176,10 @@ OpbeatBackend.prototype.sendTransactions = function (transactionList) {
       var formatedTransactions = this._formatTransactions(filterTransactions)
       var headers = this.getHeaders()
       return this._transport.sendTransaction(formatedTransactions, headers)
+        .then(undefined, function (reason) {
+          opbeatBackend._logger.warn('Failed sending transactions!', reason)
+          return Promise.reject(reason)
+        })
     }
   } else {
     this._logger.debug('Config is not valid')

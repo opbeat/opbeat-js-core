@@ -4,15 +4,7 @@ var OpbeatBackend = require('../../src/backend/opbeat_backend')
 var Transaction = require('../../src/performance/transaction')
 var ServiceFactory = require('../../src/common/serviceFactory')
 
-function TransportMock () {
-  this.transportData = []
-  this.sendTransaction = function (data, headers) {
-    this.transportData.push({data: data, headers: headers})
-  }
-  this.sendError = function (data, headers) {
-    this.transportData.push({data: data,headers: headers})
-  }
-}
+var TransportMock = require('../utils/transportMock')
 
 describe('OpbeatBackend', function () {
   var config
@@ -70,7 +62,7 @@ describe('OpbeatBackend', function () {
 
     tr.donePromise.then(function () {
       opbeatBackend.sendTransactions([tr])
-      var groups = transportMock.transportData[0].data.traces.groups
+      var groups = transportMock.transactions[0].data.traces.groups
       groups.forEach(function (g) {
         var frame = g.extra._frames
         if (typeof frame !== 'undefined') {
@@ -276,8 +268,8 @@ describe('OpbeatBackend', function () {
     tr.end()
     opbeatBackend.sendTransactions([tr])
     expect(transportMock.sendTransaction).toHaveBeenCalled()
-    expect(transportMock.transportData.length).toBe(1)
-    var groups = transportMock.transportData[0].data.traces.groups
+    expect(transportMock.transactions.length).toBe(1)
+    var groups = transportMock.transactions[0].data.traces.groups
     groups.forEach(function (g) {
       expect(g.signature.length).toBeLessThan(512)
     })
@@ -290,8 +282,8 @@ describe('OpbeatBackend', function () {
     var tr = new Transaction('transaction', 'transaction', { 'performance.enableStackFrames': true })
     tr.end()
     opbeatBackend.sendTransactions([tr])
-    expect(transportMock.transportData.length).toBe(1)
-    var headers = transportMock.transportData[0].headers
+    expect(transportMock.transactions.length).toBe(1)
+    var headers = transportMock.transactions[0].headers
     expect(headers['X-Opbeat-Platform']).toBe('platform=cordova framework=angular/version')
   })
 
@@ -301,8 +293,8 @@ describe('OpbeatBackend', function () {
     tr.end()
     tr.addContextInfo({test: 'test'})
     opbeatBackend.sendTransactions([tr])
-    expect(transportMock.transportData.length).toBe(1)
-    var data = transportMock.transportData[0].data
+    expect(transportMock.transactions.length).toBe(1)
+    var data = transportMock.transactions[0].data
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
     expect(contextInfo.test).toEqual('test')
@@ -314,8 +306,8 @@ describe('OpbeatBackend', function () {
     tr.end()
     tr.addContextInfo({url: {location: 'http://test.com/pathname?key=value#hash'}})
     opbeatBackend.sendTransactions([tr])
-    expect(transportMock.transportData.length).toBe(1)
-    var data = transportMock.transportData[0].data
+    expect(transportMock.transactions.length).toBe(1)
+    var data = transportMock.transactions[0].data
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
     expect(contextInfo.url).toEqual(jasmine.objectContaining({
@@ -332,8 +324,8 @@ describe('OpbeatBackend', function () {
     tr.end()
     tr.addContextInfo({url: {location: 'test://test.com'}})
     opbeatBackend.sendTransactions([tr])
-    expect(transportMock.transportData.length).toBe(1)
-    var data = transportMock.transportData[0].data
+    expect(transportMock.transactions.length).toBe(1)
+    var data = transportMock.transactions[0].data
     var raw = data.traces.raw[0]
     var contextInfo = raw[raw.length - 1]
     expect(contextInfo.url.location).toBeUndefined()
@@ -350,12 +342,33 @@ describe('OpbeatBackend', function () {
       var promise = exceptionHandler.processError(error)
     }
     promise.then(function () {
-      expect(transportMock.transportData.length).toBe(1)
-      var errorData = transportMock.transportData[0]
+      expect(transportMock.errors.length).toBe(1)
+      var errorData = transportMock.errors[0]
       expect(errorData.data.extra.debug).toBeUndefined()
       done()
     }, function () {
       fail()
     })
+  })
+
+  it('should warn if sendTransaction fails', function (done) {
+    config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
+    spyOn(logger, 'warn')
+    transportMock.transactionInterceptor = function (data, headers) {
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          reject('No reason!')
+        }, 0)
+      })
+    }
+    var tr = new Transaction('transaction', 'transaction')
+    tr.end()
+    opbeatBackend.sendTransactions([tr])
+      .then(function () {
+        console.log('success', arguments)
+      }, function () {
+        expect(logger.warn).toHaveBeenCalledWith('Failed sending transactions!', 'No reason!')
+        done()
+      })
   })
 })
