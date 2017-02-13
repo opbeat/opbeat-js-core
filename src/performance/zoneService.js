@@ -9,6 +9,12 @@ var XMLHttpRequest_send = 'XMLHttpRequest.send'
 
 var opbeatDataSymbol = patchUtils.opbeatSymbol('opbeatData')
 
+var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'keydown', 'keypress', 'keyup']
+var testTransactionAfterEventsObj = {}
+testTransactionAfterEvents.forEach(function (ev) {
+  testTransactionAfterEventsObj[ev] = 1
+})
+
 function ZoneService (zone, logger, config) {
   this.events = new Subscription()
 
@@ -127,6 +133,20 @@ function ZoneService (zone, logger, config) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
+      } else if (task.type === 'eventTask' && hasTarget && task.data.eventName in testTransactionAfterEventsObj) {
+        var taskId = nextId++
+        opbeatTask = {
+          taskId: task.source + taskId,
+          source: task.source,
+          type: 'interaction',
+          applyArgs: applyArgs
+        }
+
+        spec.onScheduleTask(opbeatTask)
+
+        // clear traces on the zone transaction
+        result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
+        spec.onInvokeTask(opbeatTask)
       } else {
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
       }
