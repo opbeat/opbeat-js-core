@@ -106,8 +106,9 @@ Transaction.prototype.recordEvent = function (e) {
 
 Transaction.prototype.isFinished = function () {
   var scheduledTasks = Object.keys(this._scheduledTasks)
-  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length)
-  return (scheduledTasks.length === 0)
+  var scheduledTraces = Object.keys(this._activeTraces)
+  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length, "scheduledTraces.length", scheduledTraces.length)
+  return (scheduledTasks.length === 0 && scheduledTraces.length === 0)
 }
 
 Transaction.prototype.detectFinish = function () {
@@ -169,41 +170,28 @@ Transaction.prototype._finish = function () {
     this.traces.push(eventTrace)
   }
 
-  var self = this
-  var allTraces = Object.keys(self._activeTraces).map(function (key) {
-    return self._activeTraces[key]
-  })
-  allTraces = allTraces.concat(self.traces)
-
-  var whenAllTracesFinished = allTraces.map(function (trace) {
-    return trace._isFinish
-  })
-
-  Promise.all(whenAllTracesFinished).then(function () {
-    self._adjustStartToEarliestTrace()
-    self._adjustEndToLatestTrace()
-    self.donePromise._resolve(self)
-  })
+  this._adjustStartToEarliestTrace()
+  this._adjustEndToLatestTrace()
+  this.donePromise._resolve(this)
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {
-  var latestTrace
-  var rootTrace = this._rootTrace
-  this.traces.forEach(function (trace) {
-    // Excluding rootTrace
-    if (trace === rootTrace) return
+  var latestTrace = findLatestNonXHRTrace(this.traces)
 
-    if (!latestTrace) {
-      latestTrace = trace
-    }
-    if (latestTrace && latestTrace._end < trace._end) {
-      latestTrace = trace
-    }
-  })
-
-  if (typeof latestTrace !== 'undefined') {
+  if (latestTrace) {
     this._rootTrace._end = latestTrace._end
     this._rootTrace.calcDiff()
+
+    // set all traces that now are longer than the transaction to
+    // be truncated traces
+    for (var i = 0; i < this.traces.length; i++) {
+      var trace = this.traces[i]
+      if (trace._end > this._rootTrace._end) {
+        trace._end = this._rootTrace._end
+        trace.calcDiff()
+        trace.type = trace.type + '.truncated'
+      }
+    }
   }
 }
 
@@ -215,6 +203,19 @@ Transaction.prototype._adjustStartToEarliestTrace = function () {
     this._rootTrace.calcDiff()
     this._start = this._rootTrace._start
   }
+}
+
+function findLatestNonXHRTrace (traces) {
+  var latestTrace = null
+  for (var i = 0; i < traces.length; i++) {
+    var trace = traces[i]
+    if (trace.type && trace.type.indexOf('ext') === -1 &&
+         trace.type !== 'transaction' &&
+         (!latestTrace || latestTrace._end < trace._end)) {
+      latestTrace = trace
+    }
+  }
+  return latestTrace
 }
 
 function getEarliestTrace (traces) {

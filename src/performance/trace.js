@@ -12,24 +12,8 @@ function Trace (transaction, signature, type, options) {
   // Start timers
   this._start = window.performance.now()
 
-  this._isFinish = new Promise(function (resolve, reject) {
-    this._markFinishedFunc = resolve
-  }.bind(this))
-
   if (utils.isUndefined(options) || options == null) {
     options = {}
-  }
-  var shouldGenerateStackFrames = options['enableStackFrames']
-
-  if (shouldGenerateStackFrames) {
-    this.getTraceStackFrames(function (frames) {
-      if (frames) {
-        this.frames = frames.reverse() // Reverse frames to make Opbeat happy
-      }
-      this._markFinishedFunc() // Mark the trace as finished
-    }.bind(this))
-  } else {
-    this._markFinishedFunc() // Mark the trace as finished
   }
 }
 
