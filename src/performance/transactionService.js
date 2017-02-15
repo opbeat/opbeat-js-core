@@ -172,9 +172,8 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
 TransactionService.prototype.capturePageLoadMetrics = function (tr) {
   var self = this
   var capturePageLoad = self._config.get('performance.capturePageLoad')
-  if (capturePageLoad && !self._alreadyCapturedPageLoad) {
+  if (capturePageLoad && !self._alreadyCapturedPageLoad && tr.isHardNavigation) {
     tr.addMetrics(self.metrics)
-    tr.isHardNavigation = true
     captureHardNavigation(tr)
     self._alreadyCapturedPageLoad = true
     return true
