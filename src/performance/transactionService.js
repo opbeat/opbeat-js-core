@@ -211,7 +211,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
     p.then(function (t) {
       self._logger.debug('TransactionService transaction finished', tr)
 
-      if (tr.traces.length) {
+      if (tr.traces.length > 1) {
         self.capturePageLoadMetrics(tr)
         self.add(tr)
         self._subscription.applyAll(self, [tr])
