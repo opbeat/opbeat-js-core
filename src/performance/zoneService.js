@@ -100,9 +100,15 @@ function ZoneService (zone, logger, config) {
       return delegateTask
     },
     onInvoke: function (parentZoneDelegate, currentZone, targetZone, delegate, applyThis, applyArgs, source) {
-      spec.onInvokeStart({source: source, type: 'invoke'})
+      var taskId = nextId++
+      opbeatTask = {
+          taskId: source + taskId,
+          source: source,
+          type: 'invoke',
+        }
+      spec.onInvokeStart(opbeatTask)
       var result = delegate.apply(applyThis, applyArgs)
-      spec.onInvokeEnd({source: source, type: 'invoke'})
+      spec.onInvokeEnd(opbeatTask)
       return result
     },
     onInvokeTask: function (parentZoneDelegate, currentZone, targetZone, task, applyThis, applyArgs) {
