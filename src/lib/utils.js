@@ -206,13 +206,21 @@ module.exports = {
     var xhr = new window.XMLHttpRequest()
     return 'withCredentials' in xhr
   },
+  getOpbeatScript: function () {
+    var scripts = document.getElementsByTagName('script')
+    for (var i = 0, l = scripts.length; i < l; i++) {
+      var sc = scripts[i]
+      if (sc.src.indexOf('opbeat') > 0) {
+        return sc
+      }
+    }
+  },
 
   getCurrentScript: function () {
     // Source http://www.2ality.com/2014/05/current-script.html
     var currentScript = document.currentScript
     if (!currentScript) {
-      var scripts = document.getElementsByTagName('script')
-      currentScript = scripts[scripts.length - 1]
+      return this.getOpbeatScript()
     }
     return currentScript
   },
