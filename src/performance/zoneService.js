@@ -9,7 +9,7 @@ var XMLHttpRequest_send = 'XMLHttpRequest.send'
 
 var opbeatDataSymbol = patchUtils.opbeatSymbol('opbeatData')
 
-var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'keydown', 'keypress', 'keyup']
+var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup'] // leave these out for now: 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 
 var testTransactionAfterEventsObj = {}
 testTransactionAfterEvents.forEach(function (ev) {
   testTransactionAfterEventsObj[ev] = 1
