@@ -1,5 +1,6 @@
 var backendUtils = require('./backend_utils')
 var utils = require('../lib/utils')
+var applyFilters = require('../lib/filtering').applyFilters
 
 module.exports = OpbeatBackend
 function OpbeatBackend (transport, logger, config) {
@@ -25,6 +26,10 @@ OpbeatBackend.prototype.sendError = function (errorData) {
     }
 
     var headers = this.getHeaders()
+    var errorData = applyFilters(errorData)
+    if (!errorData) {
+      logger.log("opbeat.transport.sendToOpbeat.cancelled")
+    }
     this._transport.sendError(errorData, headers)
   } else {
     this._logger.debug('Config is not valid')
