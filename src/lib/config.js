@@ -24,7 +24,7 @@ function Config () {
       captureInteractions: false,
       sendVerboseDebugInfo: false,
       includeXHRQueryString: false,
-      capturePageLoad: false
+      capturePageLoad: true
     },
     libraryPathPattern: '(node_modules|bower_components|webpack)',
     context: {},

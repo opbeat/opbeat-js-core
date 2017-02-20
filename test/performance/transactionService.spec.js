@@ -204,4 +204,19 @@ describe('TransactionService', function () {
 
     expect(pageLoadTr).toBe(zoneTr)
   })
+
+  it('should consider initial page load name or use location.pathname', function () {
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    var tr
+
+    tr = transactionService.sendPageLoadMetrics()
+    expect(tr.name).toBe(window.location.pathname)
+
+    transactionService.initialPageLoadName = 'page load name'
+    tr = transactionService.sendPageLoadMetrics()
+    expect(tr.name).toBe('page load name')
+
+    tr = transactionService.sendPageLoadMetrics('hamid-test')
+    expect(tr.name).toBe('hamid-test')
+  })
 })

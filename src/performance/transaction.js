@@ -15,10 +15,7 @@ var Transaction = function (name, type, options) {
 
   this.contextInfo = {
     _debug: {},
-    _metrics: {},
-    url: {
-      location: window.location.href
-    }
+    _metrics: {}
   }
   if (this._options.sendVerboseDebugInfo) {
     this.contextInfo._debug.log = []
@@ -121,6 +118,12 @@ Transaction.prototype.end = function () {
   }
   this.debugLog('end')
   this.ended = true
+
+  this.addContextInfo({
+    url: {
+      location: window.location.href
+    }
+  })
   this._rootTrace.end()
 
   if (this.isFinished() === true) {

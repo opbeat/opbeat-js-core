@@ -21,6 +21,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this.metrics = {}
 
   this._queue = []
+  this.initialPageLoadName = undefined
 
   this._subscription = new Subscription()
 
@@ -150,10 +151,12 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
 
   tr = this._zoneService.getFromOpbeatZone('transaction')
 
+  var trName = name || this.initialPageLoadName || window.location.pathname
+
   if (tr) {
-    tr.redefine(name, 'page-load', perfOptions)
+    tr.redefine(trName, 'page-load', perfOptions)
   } else {
-    tr = new Transaction(name, 'page-load', perfOptions)
+    tr = new Transaction(trName, 'page-load', perfOptions)
   }
 
   tr.donePromise.then(function () {
