@@ -77,13 +77,11 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   zoneService.spec.onCancelTask = onCancelTask
   function onInvokeEnd (task) {
     logger.trace('onInvokeEnd', 'source:', task.source, 'type:', task.type)
-    transactionService.removeTask(task.taskId)
     transactionService.detectFinish()
   }
   zoneService.spec.onInvokeEnd = onInvokeEnd
 
   function onInvokeStart (task) {
-    transactionService.addTask(task.taskId)
     logger.trace('onInvokeStart', 'source:', task.source, 'type:', task.type)
   }
   zoneService.spec.onInvokeStart = onInvokeStart
