@@ -96,7 +96,7 @@ function ZoneService (zone, logger, config) {
         task.data.target[opbeatDataSymbol].registeredEventListeners[task.data.eventName] = {resolved: false}
       } else if (task.type === 'microTask' && task.source === 'Promise.then') {
         taskId = nextId++
-        opbeatTask = {
+        var opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: task.type
@@ -111,7 +111,7 @@ function ZoneService (zone, logger, config) {
     },
     onInvoke: function (parentZoneDelegate, currentZone, targetZone, delegate, applyThis, applyArgs, source) {
       var taskId = nextId++
-      opbeatTask = {
+      var opbeatTask = {
           taskId: source + taskId,
           source: source,
           type: 'invoke',
@@ -151,7 +151,7 @@ function ZoneService (zone, logger, config) {
         spec.onInvokeTask(task[opbeatTaskSymbol])
       } else if (task.type === 'eventTask' && hasTarget && task.data.eventName in testTransactionAfterEventsObj) {
         var taskId = nextId++
-        opbeatTask = {
+        var opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: 'interaction',
