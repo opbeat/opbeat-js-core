@@ -94,6 +94,16 @@ function ZoneService (zone, logger, config) {
         }
       } else if (task.type === 'eventTask' && hasTarget && (task.data.eventName === 'readystatechange' || task.data.eventName === 'load')) {
         task.data.target[opbeatDataSymbol].registeredEventListeners[task.data.eventName] = {resolved: false}
+      } else if (task.type === 'microTask' && task.source === 'Promise.then') {
+        taskId = nextId++
+        var opbeatTask = {
+          taskId: task.source + taskId,
+          source: task.source,
+          type: task.type
+        }
+
+        task[opbeatTaskSymbol] = opbeatTask
+        spec.onScheduleTask(opbeatTask)
       }
 
       var delegateTask = parentZoneDelegate.scheduleTask(targetZone, task)
@@ -101,7 +111,7 @@ function ZoneService (zone, logger, config) {
     },
     onInvoke: function (parentZoneDelegate, currentZone, targetZone, delegate, applyThis, applyArgs, source) {
       var taskId = nextId++
-      opbeatTask = {
+      var opbeatTask = {
           taskId: source + taskId,
           source: source,
           type: 'invoke',
@@ -135,13 +145,13 @@ function ZoneService (zone, logger, config) {
         if (opbeatTask && (!opbeatData.registeredEventListeners['load'] || opbeatData.registeredEventListeners['load'].resolved) && (!opbeatData.registeredEventListeners['readystatechange'] || opbeatData.registeredEventListeners['readystatechange'].resolved) && opbeatTask.XHR.resolved) {
           spec.onInvokeTask(opbeatTask)
         }
-      } else if (task[opbeatTaskSymbol] && (task.source === 'setTimeout')) {
+      } else if (task[opbeatTaskSymbol] && (task.source === 'setTimeout' || task.source === 'Promise.then')) {
         spec.onBeforeInvokeTask(task[opbeatTaskSymbol])
         result = parentZoneDelegate.invokeTask(targetZone, task, applyThis, applyArgs)
         spec.onInvokeTask(task[opbeatTaskSymbol])
       } else if (task.type === 'eventTask' && hasTarget && task.data.eventName in testTransactionAfterEventsObj) {
         var taskId = nextId++
-        opbeatTask = {
+        var opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: 'interaction',
