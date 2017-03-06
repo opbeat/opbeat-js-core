@@ -129,8 +129,9 @@ describe('transaction.Transaction', function () {
 
   it('should store contextInfo.url.location', function () {
     var tr = new Transaction('/', 'transaction')
+    tr.detectFinish()
     var location = tr.contextInfo.url.location
-    expect(typeof location).toBe('string')
+    expect(location).toBe(window.location.href)
   })
 
   it('should store debug.log in contextInfo', function () {

@@ -23,6 +23,22 @@ describe('lib/utils', function () {
     expect(deepMerged).toEqual(Object({a: null, b: 'b'}))
   })
 
+  it('should get opbeat script', function () {
+    var script = window.document.createElement('script')
+    script.src = './opbeat-hamid.js'
+    script.setAttribute('data-app-id', 'appId')
+    var html = document.getElementsByTagName('html')[0]
+    // html.appendChild(script)
+    var theFirstChild = html.firstChild
+    html.insertBefore(script, theFirstChild)
+
+    var result = utils.getOpbeatScript()
+    expect(result).toBe(script)
+    expect(result.getAttribute('data-app-id')).toBe('appId')
+
+    html.removeChild(script)
+  })
+
   describe('parseUrl', function () {
     it('should parse relative url', function () {
       var result = utils.parseUrl('/path?param=value&param2=value2&0=zero&foo&empty=&key=double=double&undefined')
