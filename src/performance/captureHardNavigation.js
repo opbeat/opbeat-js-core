@@ -47,7 +47,7 @@ module.exports = function captureHardNavigation (transaction) {
 
     if (window.performance.getEntriesByType) {
       var entries = window.performance.getEntriesByType('resource')
-      for (i = 0; i < entries.length; i++) {
+      for (var i = 0; i < entries.length; i++) {
         var entry = entries[i]
         if (entry.initiatorType && entry.initiatorType === 'xmlhttprequest') {
           continue
