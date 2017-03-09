@@ -211,7 +211,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
     p.then(function (t) {
       self._logger.debug('TransactionService transaction finished', tr)
 
-      if (tr.traces.length > 1) {
+      if (tr.traces.length > 1 && !this.shouldIgnoreTransaction(tr)) {
         self.capturePageLoadMetrics(tr)
         self.add(tr)
         self._subscription.applyAll(self, [tr])
@@ -226,6 +226,22 @@ TransactionService.prototype.startTransaction = function (name, type) {
   }
 
 return tr
+}
+
+TransactionService.prototype.shouldIgnoreTransaction = function (transaction) {
+  var ignoreList = this._config.get('performance.ignoreTransactions')
+  
+  for (var i = 0; i < ignoreList.length; i++) {
+    var element = ignoreList[i];
+    if (typeof element.test === 'function') {
+      if (element.test(transaction.name)) {
+        return true
+      }
+    }else if (element === transaction.name) {
+      return true
+    }
+  }
+  return false
 }
 
 TransactionService.prototype.startTrace = function (signature, type, options) {

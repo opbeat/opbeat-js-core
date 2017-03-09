@@ -219,4 +219,18 @@ describe('TransactionService', function () {
     tr = transactionService.sendPageLoadMetrics('hamid-test')
     expect(tr.name).toBe('hamid-test')
   })
+
+  it('should ignore transactions that match the list', function () {
+    config.set('performance.ignoreTransactions', ['transaction1', /transaction2/])
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    var dontIgnoreTr = new Transaction('dont-ignore', 'page-load')
+    var ignoreTr1 = new Transaction('transaction1', 'page-load')
+    var ignoreTr2 = new Transaction('something-transaction2-something', 'page-load')
+    
+    expect(transactionService.shouldIgnoreTransaction(dontIgnoreTr)).toBeFalsy()
+    expect(transactionService.shouldIgnoreTransaction(ignoreTr1)).toBeTruthy()
+    expect(transactionService.shouldIgnoreTransaction(ignoreTr2)).toBeTruthy()
+
+    config.set('performance.ignoreTransactions', [])
+  })
 })
