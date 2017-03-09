@@ -16,7 +16,8 @@ describe('ZoneService', function () {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 50000
   })
   //  can't create a new ZoneService for each test since the old one is also using the global zone
-  zoneService = new ZoneService(window.Zone.current, logger)
+  zoneService = new ZoneService(logger)
+  zoneService.initialize(window.Zone.current)
 
   function resetZoneCallbacks (zoneService) {
     zoneService.spec.onScheduleTask = function (task) {}
