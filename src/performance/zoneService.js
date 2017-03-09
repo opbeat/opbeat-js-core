@@ -15,12 +15,11 @@ testTransactionAfterEvents.forEach(function (ev) {
   testTransactionAfterEventsObj[ev] = 1
 })
 
-function ZoneService (zone, logger, config) {
+function ZoneService (logger, config) {
   this.events = new Subscription()
 
   var nextId = 0
 
-  this.events = new Subscription()
   // var zoneService = this
   function noop () { }
   var spec = this.spec = {
@@ -33,7 +32,7 @@ function ZoneService (zone, logger, config) {
     onInvokeEnd: noop
   }
 
-  var zoneConfig = {
+  this.zoneConfig = {
     name: 'opbeatRootZone',
     onScheduleTask: function (parentZoneDelegate, currentZone, targetZone, task) {
       if (task.type === 'eventTask' && task.data.eventName === 'opbeatImmediatelyFiringEvent') {
@@ -210,8 +209,11 @@ function ZoneService (zone, logger, config) {
   //     return childZone
   //   }
   // }
+}
+
+ZoneService.prototype.initialize = function (zone) {
   this.outer = zone
-  this.zone = zone.fork(zoneConfig)
+  this.zone = zone.fork(this.zoneConfig)
 }
 
 ZoneService.prototype.set = function (key, value) {
