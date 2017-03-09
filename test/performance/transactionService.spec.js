@@ -221,13 +221,13 @@ describe('TransactionService', function () {
   })
 
   it('should ignore transactions that match the list', function () {
-    config.set('performance.ignoreTransactions', ['transaction1', /transaction2/])
+    config.set('ignoreTransactions', ['transaction1', /transaction2/])
     transactionService = new TransactionService(zoneServiceMock, logger, config)
     
     expect(transactionService.shouldIgnoreTransaction('dont-ignore')).toBeFalsy()
     expect(transactionService.shouldIgnoreTransaction('transaction1')).toBeTruthy()
     expect(transactionService.shouldIgnoreTransaction('something-transaction2-something')).toBeTruthy()
 
-    config.set('performance.ignoreTransactions', [])
+    config.set('ignoreTransactions', [])
   })
 })

@@ -215,7 +215,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
 }
 
 TransactionService.prototype.shouldIgnoreTransaction = function (transaction_name) {
-  var ignoreList = this._config.get('performance.ignoreTransactions')
+  var ignoreList = this._config.get('ignoreTransactions')
   
   for (var i = 0; i < ignoreList.length; i++) {
     var element = ignoreList[i];
