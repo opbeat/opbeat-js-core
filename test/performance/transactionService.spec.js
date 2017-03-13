@@ -167,6 +167,7 @@ describe('TransactionService', function () {
 
     var tr1 = transactionService.startTransaction('transaction1', 'transaction')
     expect(tr1.isHardNavigation).toBe(false)
+    tr1.isHardNavigation = true
     tr1.detectFinish()
     tr1.donePromise.then(function () {
       expect(tr1.isHardNavigation).toBe(true)
@@ -196,7 +197,7 @@ describe('TransactionService', function () {
       done()
     })
 
-    var zoneTr = new Transaction('transaction', 'transaction')
+    var zoneTr = new Transaction('ZoneTransaction', 'zone-transaction')
     zoneServiceMock.set('transaction', zoneTr)
 
     transactionService = new TransactionService(zoneServiceMock, logger, config)

@@ -146,11 +146,12 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
 
   var trName = name || this.initialPageLoadName || window.location.pathname
 
-  if (tr) {
+  if (tr && tr.name === 'ZoneTransaction') {
     tr.redefine(trName, 'page-load', perfOptions)
   } else {
     tr = new Transaction(trName, 'page-load', perfOptions)
   }
+  tr.isHardNavigation = true
 
   tr.donePromise.then(function () {
     var captured = self.capturePageLoadMetrics(tr)
@@ -166,9 +167,8 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
 TransactionService.prototype.capturePageLoadMetrics = function (tr) {
   var self = this
   var capturePageLoad = self._config.get('performance.capturePageLoad')
-  if (capturePageLoad && !self._alreadyCapturedPageLoad) {
+  if (capturePageLoad && !self._alreadyCapturedPageLoad && tr.isHardNavigation) {
     tr.addMetrics(self.metrics)
-    tr.isHardNavigation = true
     captureHardNavigation(tr)
     self._alreadyCapturedPageLoad = true
     return true
