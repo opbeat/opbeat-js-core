@@ -220,4 +220,39 @@ describe('TransactionService', function () {
     tr = transactionService.sendPageLoadMetrics('hamid-test')
     expect(tr.name).toBe('hamid-test')
   })
+
+  xit('should not add duplicate resource traces', function (done) {
+    config.set('performance.enable', true)
+    config.set('performance.capturePageLoad', true)
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+
+    var tr = transactionService.startTransaction('transaction', 'transaction')
+    tr.isHardNavigation = true
+    var queryString = '?' + Date.now()
+    var testUrl = '/base/test/performance/transactionService.spec.js'
+
+    if (window.performance.getEntriesByType) {
+      if (window.fetch) {
+        window.fetch(testUrl + queryString).then(function () {
+          var entries = window.performance.getEntriesByType('resource').filter(function (entry) {
+            return entry.name.indexOf(testUrl + queryString) > -1
+          })
+          expect(entries.length).toBe(1)
+
+          tr.donePromise.then(function () {
+            var filtered = tr.traces.filter(function (trace) {
+              return trace.signature.indexOf(testUrl) > -1
+            })
+            expect(filtered.length).toBe(1)
+            console.log(filtered[0])
+            fail()
+          })
+
+          var xhrTask = {source: 'XMLHttpRequest.send', XHR: {url: testUrl,method: 'GET'}}
+          zoneServiceMock.spec.onScheduleTask(xhrTask)
+          zoneServiceMock.spec.onInvokeTask(xhrTask)
+        })
+      }
+    }
+  })
 })
