@@ -103,9 +103,8 @@ Transaction.prototype.recordEvent = function (e) {
 
 Transaction.prototype.isFinished = function () {
   var scheduledTasks = Object.keys(this._scheduledTasks)
-  var scheduledTraces = Object.keys(this._activeTraces)
-  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length, "scheduledTraces.length", scheduledTraces.length)
-  return (scheduledTasks.length === 0 && scheduledTraces.length === 0)
+  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length)
+  return (scheduledTasks.length === 0)
 }
 
 Transaction.prototype.detectFinish = function () {
