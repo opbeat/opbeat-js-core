@@ -14,8 +14,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this._opbeatBackend = opbeatBackend
   this._zoneService = zoneService
 
-  // this.transactions = []
-  this.nextId = 1
+  this.nextAutoTaskId = 1
 
   this.taskMap = {}
   this.metrics = {}
@@ -265,9 +264,13 @@ TransactionService.prototype.subscribe = function (fn) {
 TransactionService.prototype.addTask = function (taskId) {
   var tr = this.getCurrentTransaction()
   if (tr) {
+    if (typeof taskId === 'undefined') {
+      taskId = "autoId" + this.nextAutoTaskId++
+    }
     tr.addTask(taskId)
     this._logger.debug('TransactionService.addTask', taskId)
   }
+  return taskId
 }
 TransactionService.prototype.removeTask = function (taskId) {
   var tr = this._zoneService.get('transaction')
