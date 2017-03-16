@@ -52,7 +52,7 @@ module.exports = function captureHardNavigation (transaction) {
           .filter(function (trace) { return trace.type.indexOf('ext.HttpRequest') > -1 })
           .map(function (trace) { return trace.signature.split(' ')[1] })
 
-      for (var i = 0; i < entries.length; i++) {
+      for (i = 0; i < entries.length; i++) {
         var entry = entries[i]
         if (entry.initiatorType && entry.initiatorType === 'xmlhttprequest') {
           continue
