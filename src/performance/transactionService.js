@@ -14,8 +14,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this._opbeatBackend = opbeatBackend
   this._zoneService = zoneService
 
-  this.transactions = []
-  this.nextId = 1
+  this.nextAutoTaskId = 1
 
   this.taskMap = {}
   this.metrics = {}
@@ -35,6 +34,9 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     transactionService.logInTransaction('Executing', task.taskId)
   }
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
+  
+  var self = this
+
   function onScheduleTask (task) {
     if (task.source === 'XMLHttpRequest.send') {
       var url = task['XHR']['url']
@@ -48,6 +50,10 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
 
       var trace = transactionService.startTrace(traceSignature, 'ext.HttpRequest', {'enableStackFrames': false})
       task.trace = trace
+    } else if (task.type === 'interaction') {
+      if (typeof self.interactionStarted == 'function') {
+        self.interactionStarted(task)
+      }
     }
     transactionService.addTask(task.taskId)
   }
@@ -79,10 +85,6 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     logger.trace('onInvokeStart', 'source:', task.source, 'type:', task.type)
   }
   zoneService.spec.onInvokeStart = onInvokeStart
-}
-
-TransactionService.prototype.getTransaction = function (id) {
-  return this.transactions[id]
 }
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
@@ -182,6 +184,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
     return
   }
 
+  // this will create a zone transaction if possible
   var tr = this.getCurrentTransaction()
 
   if (tr) {
@@ -198,25 +201,33 @@ TransactionService.prototype.startTransaction = function (name, type) {
     return
   }
 
-  if (this.transactions.indexOf(tr) === -1) {
-    this._logger.debug('TransactionService.startTransaction', tr)
-    var p = tr.donePromise
-    p.then(function (t) {
-      self._logger.debug('TransactionService transaction finished', tr)
-      self.capturePageLoadMetrics(tr)
+  this._logger.debug('TransactionService.startTransaction', tr)
+  tr.donePromise.then(function () {
+    self._logger.debug('TransactionService transaction finished', tr)
 
+    if (tr.traces.length > 1 && !self.shouldIgnoreTransaction(tr.name)) {
+      self.capturePageLoadMetrics(tr)
       self.add(tr)
       self._subscription.applyAll(self, [tr])
-
-      var index = self.transactions.indexOf(tr)
-      if (index !== -1) {
-        self.transactions.splice(index, 1)
-      }
-    })
-    this.transactions.push(tr)
-  }
-
+    }
+  })
   return tr
+}
+
+TransactionService.prototype.shouldIgnoreTransaction = function (transaction_name) {
+  var ignoreList = this._config.get('ignoreTransactions')
+  
+  for (var i = 0; i < ignoreList.length; i++) {
+    var element = ignoreList[i];
+    if (typeof element.test === 'function') {
+      if (element.test(transaction_name)) {
+        return true
+      }
+    }else if (element === transaction_name) {
+      return true
+    }
+  }
+  return false
 }
 
 TransactionService.prototype.startTrace = function (signature, type, options) {
@@ -254,9 +265,13 @@ TransactionService.prototype.subscribe = function (fn) {
 TransactionService.prototype.addTask = function (taskId) {
   var tr = this.getCurrentTransaction()
   if (tr) {
+    if (typeof taskId === 'undefined') {
+      taskId = "autoId" + this.nextAutoTaskId++
+    }
     tr.addTask(taskId)
     this._logger.debug('TransactionService.addTask', taskId)
   }
+  return taskId
 }
 TransactionService.prototype.removeTask = function (taskId) {
   var tr = this._zoneService.get('transaction')

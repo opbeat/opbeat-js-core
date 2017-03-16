@@ -220,4 +220,15 @@ describe('TransactionService', function () {
     tr = transactionService.sendPageLoadMetrics('hamid-test')
     expect(tr.name).toBe('hamid-test')
   })
+
+  it('should ignore transactions that match the list', function () {
+    config.set('ignoreTransactions', ['transaction1', /transaction2/])
+    transactionService = new TransactionService(zoneServiceMock, logger, config)
+    
+    expect(transactionService.shouldIgnoreTransaction('dont-ignore')).toBeFalsy()
+    expect(transactionService.shouldIgnoreTransaction('transaction1')).toBeTruthy()
+    expect(transactionService.shouldIgnoreTransaction('something-transaction2-something')).toBeTruthy()
+
+    config.set('ignoreTransactions', [])
+  })
 })

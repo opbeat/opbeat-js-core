@@ -47,10 +47,29 @@ module.exports = function captureHardNavigation (transaction) {
 
     if (window.performance.getEntriesByType) {
       var entries = window.performance.getEntriesByType('resource')
-      for (i = 0; i < entries.length; i++) {
+
+      var ajaxUrls = transaction.traces
+          .filter(function (trace) { return trace.type.indexOf('ext.HttpRequest') > -1 } )
+          .map(function (trace) { return trace.signature.split(' ')[1] })
+
+      for (var i = 0; i < entries.length; i++) {
         var entry = entries[i]
         if (entry.initiatorType && entry.initiatorType === 'xmlhttprequest') {
           continue
+        } else if (entry.initiatorType !== 'css' && entry.initiatorType !== 'img' && entry.initiatorType !== 'script' && entry.initiatorType !== 'link') {
+          // is web request? test for css/img before the expensive operation
+          var foundAjaxReq = false
+          for (var j = 0; j < ajaxUrls.length; j++) {
+            // entry.name.endsWith(ajaxUrls[j])
+            var idx = entry.name.lastIndexOf(ajaxUrls[j])
+            if (idx > -1 && idx === (entry.name.length - ajaxUrls[j].length)) {
+              foundAjaxReq = true
+              break
+            }
+          }
+          if (foundAjaxReq) {
+            continue
+          }
         } else {
           var kind = 'resource'
           if (entry.initiatorType) {
