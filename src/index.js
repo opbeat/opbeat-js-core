@@ -10,5 +10,9 @@ module.exports['patchUtils'] = require('./common/patchUtils')
 module.exports['patchCommon'] = require('./common/patchCommon')
 module.exports['utils'] = require('./lib/utils')
 
+module.exports['addFilter'] = require('./lib/filtering').addFilter
+
+
+
 var test = module.exports['test'] = {}
 test.ZoneServiceMock = require('../test/performance/zoneServiceMock')
