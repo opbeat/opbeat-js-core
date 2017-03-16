@@ -5,9 +5,9 @@ var applyFilters = require('./filtering').applyFilters
 
 module.exports = {
   sendError: function (data, headers) {
-    var data = applyFilters(data)
+    data = applyFilters(data)
     if (!data) {
-      logger.log("opbeat.transport.sendToOpbeat.cancelled")
+      logger.log('opbeat.transport.sendToOpbeat.cancelled')
     }
 
     return _sendToOpbeat('errors', data, headers)

@@ -9,7 +9,7 @@ var XMLHttpRequest_send = 'XMLHttpRequest.send'
 
 var opbeatDataSymbol = patchUtils.opbeatSymbol('opbeatData')
 
-var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup'] // leave these out for now: 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 
+var testTransactionAfterEvents = ['click', 'contextmenu', 'dblclick', 'mousedown', 'keydown', 'keypress', 'keyup'] // leave these out for now: 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover',
 var testTransactionAfterEventsObj = {}
 testTransactionAfterEvents.forEach(function (ev) {
   testTransactionAfterEventsObj[ev] = 1
@@ -95,7 +95,7 @@ function ZoneService (logger, config) {
         task.data.target[opbeatDataSymbol].registeredEventListeners[task.data.eventName] = {resolved: false}
       } else if (task.type === 'microTask' && task.source === 'Promise.then') {
         taskId = nextId++
-        var opbeatTask = {
+        opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: task.type
@@ -111,10 +111,10 @@ function ZoneService (logger, config) {
     onInvoke: function (parentZoneDelegate, currentZone, targetZone, delegate, applyThis, applyArgs, source) {
       var taskId = nextId++
       var opbeatTask = {
-          taskId: source + taskId,
-          source: source,
-          type: 'invoke',
-        }
+        taskId: source + taskId,
+        source: source,
+        type: 'invoke'
+      }
       spec.onInvokeStart(opbeatTask)
       var result = delegate.apply(applyThis, applyArgs)
       spec.onInvokeEnd(opbeatTask)
@@ -150,7 +150,7 @@ function ZoneService (logger, config) {
         spec.onInvokeTask(task[opbeatTaskSymbol])
       } else if (task.type === 'eventTask' && hasTarget && task.data.eventName in testTransactionAfterEventsObj) {
         var taskId = nextId++
-        var opbeatTask = {
+        opbeatTask = {
           taskId: task.source + taskId,
           source: task.source,
           type: 'interaction',
@@ -197,18 +197,18 @@ function ZoneService (logger, config) {
 
   //     var childZoneData = {name: childZone.name}
 
-  //     if (targetZone._properties['opbeatZoneData']) {
-  //       targetZone._properties['opbeatZoneData'].children.push(childZoneData)
-  //     } else {
-  //       targetZone._properties['opbeatZoneData'] = {
-  //         name: targetZone.name,
-  //         children: [childZoneData]
-  //       }
-  //     }
-  //     console.log('onFork:opbeatZoneData:', targetZone._properties['opbeatZoneData'])
-  //     return childZone
-  //   }
-  // }
+//     if (targetZone._properties['opbeatZoneData']) {
+//       targetZone._properties['opbeatZoneData'].children.push(childZoneData)
+//     } else {
+//       targetZone._properties['opbeatZoneData'] = {
+//         name: targetZone.name,
+//         children: [childZoneData]
+//       }
+//     }
+//     console.log('onFork:opbeatZoneData:', targetZone._properties['opbeatZoneData'])
+//     return childZone
+//   }
+// }
 }
 
 ZoneService.prototype.initialize = function (zone) {

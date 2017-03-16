@@ -35,7 +35,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     transactionService.logInTransaction('Executing', task.taskId)
   }
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
-  
+
   var self = this
 
   function onScheduleTask (task) {
@@ -52,7 +52,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
       var trace = transactionService.startTrace(traceSignature, 'ext.HttpRequest', {'enableStackFrames': false})
       task.trace = trace
     } else if (task.type === 'interaction') {
-      if (typeof self.interactionStarted == 'function') {
+      if (typeof self.interactionStarted === 'function') {
         self.interactionStarted(task)
       }
     }
@@ -217,14 +217,14 @@ TransactionService.prototype.startTransaction = function (name, type) {
 
 TransactionService.prototype.shouldIgnoreTransaction = function (transaction_name) {
   var ignoreList = this._config.get('ignoreTransactions')
-  
+
   for (var i = 0; i < ignoreList.length; i++) {
-    var element = ignoreList[i];
+    var element = ignoreList[i]
     if (typeof element.test === 'function') {
       if (element.test(transaction_name)) {
         return true
       }
-    }else if (element === transaction_name) {
+    } else if (element === transaction_name) {
       return true
     }
   }
