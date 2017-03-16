@@ -14,7 +14,7 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
   this._opbeatBackend = opbeatBackend
   this._zoneService = zoneService
 
-  this.transactions = []
+  // this.transactions = []
   this.nextId = 1
 
   this.taskMap = {}
@@ -86,10 +86,6 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     logger.trace('onInvokeStart', 'source:', task.source, 'type:', task.type)
   }
   zoneService.spec.onInvokeStart = onInvokeStart
-}
-
-TransactionService.prototype.getTransaction = function (id) {
-  return this.transactions[id]
 }
 
 TransactionService.prototype.createTransaction = function (name, type, options) {
@@ -206,27 +202,33 @@ TransactionService.prototype.startTransaction = function (name, type) {
     return
   }
 
-  if (this.transactions.indexOf(tr) === -1) {
-    this._logger.debug('TransactionService.startTransaction', tr)
-    var p = tr.donePromise
-    p.then(function (t) {
-      self._logger.debug('TransactionService transaction finished', tr)
+  this._logger.debug('TransactionService.startTransaction', tr)
+  tr.donePromise.then(function () {
+    self._logger.debug('TransactionService transaction finished', tr)
 
-      if (tr.traces.length > 1) {
-        self.capturePageLoadMetrics(tr)
-        self.add(tr)
-        self._subscription.applyAll(self, [tr])
+    if (tr.traces.length > 1 && !self.shouldIgnoreTransaction(tr.name)) {
+      self.capturePageLoadMetrics(tr)
+      self.add(tr)
+      self._subscription.applyAll(self, [tr])
+    }
+  })
+  return tr
+}
 
-        var index = self.transactions.indexOf(tr)
-        if (index !== -1) {
-          self.transactions.splice(index, 1)
-        }
+TransactionService.prototype.shouldIgnoreTransaction = function (transaction_name) {
+  var ignoreList = this._config.get('ignoreTransactions')
+  
+  for (var i = 0; i < ignoreList.length; i++) {
+    var element = ignoreList[i];
+    if (typeof element.test === 'function') {
+      if (element.test(transaction_name)) {
+        return true
       }
-    })
-    this.transactions.push(tr)
+    }else if (element === transaction_name) {
+      return true
+    }
   }
-
-return tr
+  return false
 }
 
 TransactionService.prototype.startTrace = function (signature, type, options) {
