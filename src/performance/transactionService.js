@@ -35,6 +35,9 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
     transactionService.logInTransaction('Executing', task.taskId)
   }
   zoneService.spec.onBeforeInvokeTask = onBeforeInvokeTask
+  
+  var self = this
+
   function onScheduleTask (task) {
     if (task.source === 'XMLHttpRequest.send') {
       var url = task['XHR']['url']
@@ -48,6 +51,10 @@ function TransactionService (zoneService, logger, config, opbeatBackend) {
 
       var trace = transactionService.startTrace(traceSignature, 'ext.HttpRequest', {'enableStackFrames': false})
       task.trace = trace
+    } else if (task.type === 'interaction') {
+      if (typeof self.interactionStarted == 'function') {
+        self.interactionStarted(task)
+      }
     }
     transactionService.addTask(task.taskId)
   }
@@ -182,6 +189,7 @@ TransactionService.prototype.startTransaction = function (name, type) {
     return
   }
 
+  // this will create a zone transaction if possible
   var tr = this.getCurrentTransaction()
 
   if (tr) {
@@ -203,20 +211,23 @@ TransactionService.prototype.startTransaction = function (name, type) {
     var p = tr.donePromise
     p.then(function (t) {
       self._logger.debug('TransactionService transaction finished', tr)
-      self.capturePageLoadMetrics(tr)
 
-      self.add(tr)
-      self._subscription.applyAll(self, [tr])
+      if (self.traces.length) {
 
-      var index = self.transactions.indexOf(tr)
-      if (index !== -1) {
-        self.transactions.splice(index, 1)
+        self.capturePageLoadMetrics(tr)
+        self.add(tr)
+        self._subscription.applyAll(self, [tr])
+
+        var index = self.transactions.indexOf(tr)
+        if (index !== -1) {
+          self.transactions.splice(index, 1)
+        }
       }
     })
     this.transactions.push(tr)
   }
 
-  return tr
+return tr
 }
 
 TransactionService.prototype.startTrace = function (signature, type, options) {
