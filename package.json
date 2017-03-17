@@ -15,7 +15,6 @@
     "karma-coverage": "node node_modules/karma/bin/karma start --coverage",
     "test": "node node_modules/standard/bin/cmd.js src/**/* && gulp test:unit:sauce"
   },
-  "private": true,
   "files": [
     "src/**/*.js",
     "test/**/*.js"
