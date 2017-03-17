@@ -1,3 +1,29 @@
+<a name="0.2.0"></a>
+# [0.2.0](https://github.com/opbeat/opbeat-js-core/compare/v0.1.0...v0.2.0) (2017-03-17)
+
+
+### Bug Fixes
+
+* Add tasks on invoke ([092f12a](https://github.com/opbeat/opbeat-js-core/commit/092f12a))
+* Check `document` before getting current script for serverside rendering. ([a33ca02](https://github.com/opbeat/opbeat-js-core/commit/a33ca02))
+* ignore duplicate resources in traces ([680d33e](https://github.com/opbeat/opbeat-js-core/commit/680d33e))
+* only send transaction if it has more than one traces ([aaa9e11](https://github.com/opbeat/opbeat-js-core/commit/aaa9e11))
+* remove TransportMock from the public API. ([550c95c](https://github.com/opbeat/opbeat-js-core/commit/550c95c))
+* **Transaction:** Only wait for tasks to finish a transaction ([6acfa6d](https://github.com/opbeat/opbeat-js-core/commit/6acfa6d))
+* **ZoneService:** Handle promise tasks properly. ([b510679](https://github.com/opbeat/opbeat-js-core/commit/b510679))
+* **ZoneService:** Ignore some mouse events for now. ([b2aed7c](https://github.com/opbeat/opbeat-js-core/commit/b2aed7c))
+* **ZoneService:** Update initialization to work with SSR. ([0911b82](https://github.com/opbeat/opbeat-js-core/commit/0911b82))
+
+
+### Features
+
+* Add "truncated traces" feature. ([383f65b](https://github.com/opbeat/opbeat-js-core/commit/383f65b))
+* Infrastructure needed to support interactions. ([20ed4de](https://github.com/opbeat/opbeat-js-core/commit/20ed4de))
+* use filters for errors. ([2497c95](https://github.com/opbeat/opbeat-js-core/commit/2497c95))
+* **transactionService:** Allow integrations to ignore transactions by name. ([5ea4b7d](https://github.com/opbeat/opbeat-js-core/commit/5ea4b7d))
+
+
+
 <a name="0.1.0"></a>
 # [0.1.0](https://github.com/opbeat/opbeat-js-core/compare/dfe9699...v0.1.0) (2017-03-14)
 
