@@ -1,7 +1,7 @@
 var Trace = require('./trace')
 var utils = require('../lib/utils')
 
-var Transaction = function (name, type, options) {
+var Transaction = function (name, type, options, logger) {
   this.metadata = {}
   this.name = name
   this.type = type
@@ -9,6 +9,7 @@ var Transaction = function (name, type, options) {
   this._markDoneAfterLastTrace = false
   this._isDone = false
   this._options = options
+  this._logger = logger
   if (typeof options === 'undefined') {
     this._options = {}
   }
@@ -49,7 +50,9 @@ Transaction.prototype.debugLog = function () {
   if (this._options.sendVerboseDebugInfo) {
     var messages = (arguments.length === 1 ? [arguments[0]] : Array.apply(null, arguments))
     messages.unshift(Date.now().toString())
-    this.contextInfo._debug.log.push(messages.join(' - '))
+    var textMessage = messages.join(' - ')
+    this.contextInfo._debug.log.push(textMessage)
+    if (this._logger) this._logger.debug(textMessage)
   }
 }
 
@@ -103,7 +106,7 @@ Transaction.prototype.recordEvent = function (e) {
 
 Transaction.prototype.isFinished = function () {
   var scheduledTasks = Object.keys(this._scheduledTasks)
-  this.debugLog('isFinished scheduledTasks.length', scheduledTasks.length)
+  this.debugLog('isFinished scheduledTasks', scheduledTasks)
   return (scheduledTasks.length === 0)
 }
 

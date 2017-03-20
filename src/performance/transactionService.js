@@ -96,7 +96,7 @@ TransactionService.prototype.createTransaction = function (name, type, options) 
     return
   }
 
-  var tr = new Transaction(name, type, perfOptions)
+  var tr = new Transaction(name, type, perfOptions, this._logger)
   tr.setDebugData('zone', this._zoneService.getCurrentZone().name)
   this._zoneService.set('transaction', tr)
   if (perfOptions.checkBrowserResponsiveness) {
@@ -151,7 +151,7 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
   if (tr && tr.name === 'ZoneTransaction') {
     tr.redefine(trName, 'page-load', perfOptions)
   } else {
-    tr = new Transaction(trName, 'page-load', perfOptions)
+    tr = new Transaction(trName, 'page-load', perfOptions, this._logger)
   }
   tr.isHardNavigation = true
 
@@ -266,7 +266,7 @@ TransactionService.prototype.addTask = function (taskId) {
   var tr = this.getCurrentTransaction()
   if (tr) {
     if (typeof taskId === 'undefined') {
-      taskId = "autoId" + this.nextAutoTaskId++
+      taskId = 'autoId' + this.nextAutoTaskId++
     }
     tr.addTask(taskId)
     this._logger.debug('TransactionService.addTask', taskId)
