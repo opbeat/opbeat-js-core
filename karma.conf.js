@@ -54,7 +54,7 @@ module.exports = function (config) {
     ],
     files: [
       'test/utils/polyfill.js',
-      'node_modules/zone.js/dist/zone.js',
+      'node_modules/opbeat-zone/dist/zone.js',
       specPattern,
       { pattern: 'test/exceptions/data/*.js', included: false, watched: false },
       { pattern: 'src/**/*.js', included: false, watched: true }
