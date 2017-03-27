@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -e
+
 if [[ $# -lt 1 || "$1" != "patch" && "$1" != "minor" ]];
 then
     echo "Usage: $0 <version_type - [patch|minor]>"
-    exit
+    exit 1
 fi
 
 git diff-index --quiet HEAD
@@ -11,7 +13,7 @@ GITSTATUS=$?
 if [ $GITSTATUS -ne 0 ];
 then
     echo "Git working directory not clean. Aborting.";
-    exit
+    exit 1
 fi
 
 git checkout master
@@ -20,7 +22,7 @@ git remote update
 if [[ `git rev-parse HEAD` != `git rev-parse origin/master` ]]
 then
     echo "Different state between local and origin. Aborting.";
-    exit
+    exit 1
 fi
 
 gulp build && npm test
@@ -28,7 +30,7 @@ TEST_RESULT=$?
 if [[ TEST_RESULT -ne 0 ]];
 then
     echo "Test failed. Aborting.";
-    exit
+    exit 1
 fi
 
 VERSION_TYPE="$1"
@@ -38,7 +40,11 @@ npm version $VERSION_TYPE --no-git-tag-version
 PACKAGE_VERSION=`node -e "console.log(require('./package.json').version);"`
 TAG_NAME="v$PACKAGE_VERSION"
 
-conventional-changelog -p angular -i CHANGELOG.md -s
+{
+    conventional-changelog -p angular -i CHANGELOG.md -s
+} || {
+    read -r -p "Could not generate changelog automatically. Please write the it manually and press ENTER." TRASH
+}
 
 git diff
 
@@ -49,7 +55,7 @@ if ! [[ $RESPONSE =~ ^([yY][eE][sS]|[yY])$ ]];
 then
     echo "Rolling back changes."
     git checkout -- package.json CHANGELOG.md
-    exit
+    exit 1
 fi
 
 # todo: check travis status
@@ -64,5 +70,5 @@ gulp build && gulp build:release
 
 # git push origin $BRANCH_NAME
 
-
 echo "All done. ($TAG_NAME)"
+exit 0
