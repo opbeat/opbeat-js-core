@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 if [[ $# -lt 1 || "$1" != "patch" && "$1" != "minor" ]];
 then

@@ -19,6 +19,10 @@ Use `npm run karma` to continuously run unit tests during development.
 
 Use `npm test` to run both unit tests and e2e tests.
 
+## Making a release
+
+Use `npm run prepare-patch` or `npm run prepare-minor` to prepare and publish a release.
+Note that you should NOT make a new commit for the release it will be done in the preparation process.
 
 ## License
 MIT
