@@ -25,7 +25,7 @@ module.exports = {
 function _sendToOpbeat (endpoint, data, headers) {
   logger.log('opbeat.transport.sendToOpbeat', data)
 
-  var url = 'https://' + config.get('apiHost') + '/api/v1/organizations/' + config.get('orgId') + '/apps/' + config.get('appId') + '/client-side/' + endpoint + '/'
+  var url = config.get('apiOrigin') + '/api/v1/organizations/' + config.get('orgId') + '/apps/' + config.get('appId') + '/client-side/' + endpoint + '/'
 
   return _makeRequest(url, 'POST', 'JSON', data, headers)
 }

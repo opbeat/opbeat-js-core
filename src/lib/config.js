@@ -6,7 +6,7 @@ function Config () {
   this.defaults = {
     opbeatAgentName: 'opbeat-js',
     VERSION: '%%VERSION%%',
-    apiHost: 'intake.opbeat.com',
+    apiOrigin: 'https://intake.opbeat.com',
     isInstalled: false,
     debug: false,
     logLevel: 'warn',
