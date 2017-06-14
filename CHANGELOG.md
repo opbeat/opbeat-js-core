@@ -1,3 +1,13 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/opbeat/opbeat-js-core/compare/v0.2.4...v0.3.0) (2017-06-14)
+
+
+### Bug Fixes
+
+* change apiHost config to apiOrigin to include protocol ([4b85b96](https://github.com/opbeat/opbeat-js-core/commit/4b85b96))
+
+
+
 <a name="0.2.4"></a>
 ## [0.2.4](https://github.com/opbeat/opbeat-js-core/compare/v0.2.3...v0.2.4) (2017-03-28)
 
