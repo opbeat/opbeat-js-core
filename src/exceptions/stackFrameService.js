@@ -124,8 +124,13 @@ StackFrameService.prototype.processOpbeatException = function (exception, userCo
     culprit = fileName
   }
 
+  var messagePrefix = ''
+  if (type && typeof message === 'string' && message.indexOf('Error:') !== 0) {
+    messagePrefix = type + ': '
+  }
+
   var data = {
-    message: type + ': ' + message,
+    message: messagePrefix + message,
     culprit: culprit,
     exception: {
       type: type,

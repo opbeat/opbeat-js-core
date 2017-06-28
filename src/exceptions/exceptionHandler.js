@@ -27,12 +27,24 @@ ExceptionHandler.prototype.processError = function (err, options) {
   return this._processError(err, options)
 }
 
-ExceptionHandler.prototype._processError = function processError (error, options) {
+ExceptionHandler.prototype.getExceptionData = function getExceptionData (errorObject, options) {
   var eo = options && options.eventObject || {}
   var msg = eo.msg
   var file = eo.file
   var line = eo.line
   var col = eo.col
+  var error = errorObject
+
+  if (eo.msg && typeof eo.msg !== 'string') {
+    // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+    var errorEvent = eo.msg
+    msg = errorEvent.message
+    file = file || errorEvent.filename
+    line = line || errorEvent.lineno
+    col = col || errorEvent.colno
+    error = errorObject || errorEvent.error
+  }
+
   if (msg === 'Script error.' && !file) {
     // ignoring script errors: See https://github.com/getsentry/raven-js/issues/41
     return
@@ -51,11 +63,12 @@ ExceptionHandler.prototype._processError = function processError (error, options
     'colno': col || null,
     'extra': extraContext
   }
-
   if (!exception.type) {
     // Try to extract type from message formatted like 'ReferenceError: Can't find variable: initHighlighting'
-    if (exception.message.indexOf(':') > -1) {
+    if (exception.message && exception.message.indexOf(':') > -1) {
       exception.type = exception.message.split(':')[0]
+    } else {
+      exception.type = ''
     }
   }
 
@@ -66,9 +79,9 @@ ExceptionHandler.prototype._processError = function processError (error, options
   } else {
     resolveStackFrames = new Promise(function (resolve, reject) {
       resolve([{
-        'fileName': file,
-        'lineNumber': line,
-        'columnNumber': col
+        'fileName': exception.fileurl,
+        'lineNumber': exception.lineno,
+        'columnNumber': exception.colno
       }])
     })
   }
@@ -78,11 +91,21 @@ ExceptionHandler.prototype._processError = function processError (error, options
     exception.stack = stackFrames || []
     return exceptionHandler._stackFrameService.stackInfoToOpbeatException(exception).then(function (exception) {
       var data = exceptionHandler._stackFrameService.processOpbeatException(exception, exceptionHandler._config.get('context.user'), exceptionHandler._config.get('context.extra'))
-      exceptionHandler._opbeatBackend.sendError(data)
+      return data
     })
-  })['catch'](function (error) {
-    exceptionHandler._logger.warn(error)
   })
+}
+
+ExceptionHandler.prototype._processError = function processError (errorObject, options) {
+  var exceptionHandler = this
+  var resultPromise = exceptionHandler.getExceptionData(errorObject, options)
+  if (resultPromise) {
+    return resultPromise.then(function (data) {
+      return exceptionHandler._opbeatBackend.sendError(data)
+    })['catch'](function (error) {
+      exceptionHandler._logger.warn(error)
+    })
+  }
 }
 
 function getProperties (err) {
