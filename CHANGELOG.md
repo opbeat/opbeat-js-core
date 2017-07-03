@@ -1,3 +1,13 @@
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/opbeat/opbeat-js-core/compare/v0.3.0...v0.3.1) (2017-07-03)
+
+
+### Features
+
+* **ExceptionHandler:** support ErrorEvent ([44474d8](https://github.com/opbeat/opbeat-js-core/commit/44474d8))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/opbeat/opbeat-js-core/compare/v0.2.4...v0.3.0) (2017-06-14)
 
