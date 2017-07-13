@@ -1,3 +1,8 @@
+<a name="0.3.2"></a>
+## [0.3.2](https://github.com/opbeat/opbeat-js-core/compare/v0.3.1...v0.3.2) (2017-07-13)
+
+
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/opbeat/opbeat-js-core/compare/v0.3.0...v0.3.1) (2017-07-03)
 
