@@ -238,8 +238,12 @@ ZoneService.prototype.isOpbeatZone = function () {
   return this.zone.name === window.Zone.current.name
 }
 
-ZoneService.prototype.runOuter = function (fn) {
-  return this.outer.run(fn)
+ZoneService.prototype.runOuter = function (fn, applyThis, applyArgs) {
+  if (this.outer) {
+    return this.outer.run(fn, applyThis, applyArgs)
+  } else {
+    return fn.apply(applyThis, applyArgs)
+  }
 }
 
 ZoneService.prototype.runInOpbeatZone = function runInOpbeatZone (fn, applyThis, applyArgs, source) {

@@ -27,7 +27,11 @@ describe('transaction.Transaction', function () {
     firstTrace.end()
 
     var transaction = new Transaction('/', 'transaction', {})
-
+    transaction.doneCallback = function () {
+      expect(transaction._rootTrace._start).toBe(firstTrace._start)
+      expect(transaction._rootTrace._end >= lastTrace._end).toBeTruthy()
+      done()
+    }
     firstTrace.transaction = transaction
     firstTrace.setParent(transaction._rootTrace)
     transaction.addEndedTraces([firstTrace])
@@ -36,11 +40,6 @@ describe('transaction.Transaction', function () {
 
     lastTrace.end()
     transaction.detectFinish()
-    transaction.donePromise.then(function () {
-      expect(transaction._rootTrace._start).toBe(firstTrace._start)
-      expect(transaction._rootTrace._end >= lastTrace._end).toBeTruthy()
-      done()
-    })
   })
 
   it('should adjust rootTrace to latest trace', function (done) {
@@ -83,6 +82,13 @@ describe('transaction.Transaction', function () {
 
   it('should generate stacktrace based on transaction options', function (done) {
     var tr = new Transaction('/', 'transaction', {'enableStackFrames': true})
+    var trPromise = new Promise(function (resolve, reject) {
+      tr.doneCallback = function () {
+        // expect(firstTrace.frames).not.toBeUndefined()
+        expect(secondTrace.frames).toBeUndefined()
+        resolve()
+      }
+    })
 
     var firstTrace = tr.startTrace('first-trace-signature', 'first-trace')
     firstTrace.end()
@@ -90,20 +96,18 @@ describe('transaction.Transaction', function () {
     var secondTrace = tr.startTrace('second-trace', 'second-trace', {'enableStackFrames': false})
     secondTrace.end()
 
-    tr.donePromise.then(function () {
-      // expect(firstTrace.frames).not.toBeUndefined()
-      expect(secondTrace.frames).toBeUndefined()
-    })
-
     var noStackTrace = new Transaction('/', 'transaction', {'enableStackFrames': false})
     var thirdTrace = noStackTrace.startTrace('third-trace', 'third-trace', {'enableStackFrames': true})
     thirdTrace.end()
 
-    noStackTrace.donePromise.then(function () {
-      expect(thirdTrace.frames).toBeUndefined()
+    var noStackTracePromise = new Promise(function (resolve, reject) {
+      noStackTrace.doneCallback = function () {
+        expect(thirdTrace.frames).toBeUndefined()
+        resolve()
+      }
     })
 
-    Promise.all([tr.donePromise, noStackTrace.donePromise]).then(function () {
+    Promise.all([trPromise, noStackTracePromise]).then(function () {
       done()
     })
 
@@ -112,18 +116,17 @@ describe('transaction.Transaction', function () {
   })
   it('should not generate stacktrace if the option is not passed', function (done) {
     var tr = new Transaction('/', 'transaction')
-
+    tr.doneCallback = function () {
+      expect(firstTrace.frames).toBeUndefined()
+      expect(secondTrace.frames).toBeUndefined()
+      done()
+    }
     var firstTrace = tr.startTrace('first-trace-signature', 'first-trace', {'enableStackFrames': true})
     firstTrace.end()
 
     var secondTrace = tr.startTrace('second-trace', 'second-trace')
     secondTrace.end()
 
-    tr.donePromise.then(function () {
-      expect(firstTrace.frames).toBeUndefined()
-      expect(secondTrace.frames).toBeUndefined()
-      done()
-    })
     tr.end()
   })
 

@@ -30,10 +30,7 @@ var Transaction = function (name, type, options, logger) {
 
   this.events = {}
 
-  Promise.call(this.donePromise = Object.create(Promise.prototype), function (resolve, reject) {
-    this._resolve = resolve
-    this._reject = reject
-  }.bind(this.donePromise))
+  this.doneCallback = function noop () {}
 
   // A transaction should always have a root trace spanning the entire transaction.
   this._rootTrace = this.startTrace('transaction', 'transaction', {enableStackFrames: false})
@@ -131,7 +128,6 @@ Transaction.prototype.end = function () {
   if (this.isFinished() === true) {
     this._finish()
   }
-  return this.donePromise
 }
 
 Transaction.prototype.addTask = function (taskId) {
@@ -177,7 +173,7 @@ Transaction.prototype._finish = function () {
 
   this._adjustStartToEarliestTrace()
   this._adjustEndToLatestTrace()
-  this.donePromise._resolve(this)
+  this.doneCallback(this)
 }
 
 Transaction.prototype._adjustEndToLatestTrace = function () {
@@ -215,8 +211,8 @@ function findLatestNonXHRTrace (traces) {
   for (var i = 0; i < traces.length; i++) {
     var trace = traces[i]
     if (trace.type && trace.type.indexOf('ext') === -1 &&
-         trace.type !== 'transaction' &&
-         (!latestTrace || latestTrace._end < trace._end)) {
+      trace.type !== 'transaction' &&
+      (!latestTrace || latestTrace._end < trace._end)) {
       latestTrace = trace
     }
   }

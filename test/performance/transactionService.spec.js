@@ -167,37 +167,40 @@ describe('TransactionService', function () {
     transactionService = new TransactionService(zoneServiceMock, logger, config)
 
     var tr1 = transactionService.startTransaction('transaction1', 'transaction')
-    expect(tr1.isHardNavigation).toBe(false)
-    tr1.isHardNavigation = true
-    tr1.detectFinish()
-    tr1.donePromise.then(function () {
+    var tr1DoneFn = tr1.doneCallback
+    tr1.doneCallback = function () {
+      tr1DoneFn()
       expect(tr1.isHardNavigation).toBe(true)
       tr1.traces.forEach(function (t) {
         expect(t.duration()).toBeLessThan(5 * 60 * 1000)
         expect(t.duration()).toBeGreaterThan(-1)
       })
-    })
+    }
+    expect(tr1.isHardNavigation).toBe(false)
+    tr1.isHardNavigation = true
+    tr1.detectFinish()
 
     var tr2 = transactionService.startTransaction('transaction2', 'transaction')
     expect(tr2.isHardNavigation).toBe(false)
-    tr2.detectFinish()
-    tr2.donePromise.then(function () {
+    var tr2DoneFn = tr2.doneCallback
+    tr2.doneCallback = function () {
+      tr2DoneFn()
       expect(tr2.isHardNavigation).toBe(false)
       done()
-    })
+    }
+    tr2.detectFinish()
   })
 
   it('should sendPageLoadMetrics', function (done) {
     config.set('performance.enable', true)
     config.set('performance.capturePageLoad', true)
     transactionService = new TransactionService(zoneServiceMock, logger, config)
-    var tr = transactionService.sendPageLoadMetrics('test')
 
-    tr.donePromise.then(function () {
+    transactionService.subscribe(function () {
       expect(tr.isHardNavigation).toBe(true)
       done()
     })
-
+    var tr = transactionService.sendPageLoadMetrics('test')
     var zoneTr = new Transaction('ZoneTransaction', 'zone-transaction')
     zoneServiceMock.set('transaction', zoneTr)
 

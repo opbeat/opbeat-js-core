@@ -57,10 +57,9 @@ describe('OpbeatBackend', function () {
     expect(config.isValid()).toBe(true)
 
     var tr = new Transaction('transaction', 'transaction', { 'performance.enableStackFrames': true })
-    tr.startTrace().end()
-    tr.end()
 
-    tr.donePromise.then(function () {
+
+    tr.doneCallback = function () {
       opbeatBackend.sendTransactions([tr])
       var groups = transportMock.transactions[0].data.traces.groups
       groups.forEach(function (g) {
@@ -70,9 +69,9 @@ describe('OpbeatBackend', function () {
         }
       })
       done()
-    }).catch(function (reason) {
-      fail(reason)
-    })
+    }
+    tr.startTrace().end()
+    tr.end()
   })
 
   it('should group small continuously similar traces up until the last one', function () {

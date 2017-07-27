@@ -155,13 +155,15 @@ TransactionService.prototype.sendPageLoadMetrics = function (name) {
   }
   tr.isHardNavigation = true
 
-  tr.donePromise.then(function () {
-    var captured = self.capturePageLoadMetrics(tr)
-    if (captured) {
-      self.add(tr)
-      self._subscription.applyAll(self, [tr])
-    }
-  })
+  tr.doneCallback = function () {
+    self.applyAsync(function () {
+      var captured = self.capturePageLoadMetrics(tr)
+      if (captured) {
+        self.add(tr)
+        self._subscription.applyAll(self, [tr])
+      }
+    })
+  }
   tr.detectFinish()
   return tr
 }
@@ -202,16 +204,27 @@ TransactionService.prototype.startTransaction = function (name, type) {
   }
 
   this._logger.debug('TransactionService.startTransaction', tr)
-  tr.donePromise.then(function () {
-    self._logger.debug('TransactionService transaction finished', tr)
+  tr.doneCallback = function () {
+    self.applyAsync(function () {
+      self._logger.debug('TransactionService transaction finished', tr)
 
-    if (tr.traces.length > 1 && !self.shouldIgnoreTransaction(tr.name)) {
-      self.capturePageLoadMetrics(tr)
-      self.add(tr)
-      self._subscription.applyAll(self, [tr])
-    }
-  })
+      if (tr.traces.length > 1 && !self.shouldIgnoreTransaction(tr.name)) {
+        self.capturePageLoadMetrics(tr)
+        self.add(tr)
+        self._subscription.applyAll(self, [tr])
+      }
+    })
+  }
   return tr
+}
+
+TransactionService.prototype.applyAsync = function (fn, applyThis, applyArgs) {
+  return this._zoneService.runOuter(function () {
+    return Promise.resolve()
+      .then(function () {
+        return fn.apply(applyThis, applyArgs)
+      })
+  })
 }
 
 TransactionService.prototype.shouldIgnoreTransaction = function (transaction_name) {

@@ -352,6 +352,12 @@ describe('ZoneService', function () {
       })
     })
   })
+  it('should runOuter even if ZoneService is not initialized', function (done) {
+    zoneService = new ZoneService(logger)
+    zoneService.runOuter(function () {
+      done()
+    })
+  })
 
   afterEach(function () {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout
