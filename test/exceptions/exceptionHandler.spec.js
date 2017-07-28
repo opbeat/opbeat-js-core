@@ -1,19 +1,16 @@
 var ServiceFactory = require('../../src/common/serviceFactory')
-var Config = require('../../src/lib/config')
 var TransportMock = require('../utils/transportMock')
 
 describe('ExceptionHandler', function () {
   var testErrorMessage = 'errorevent_test_error_message'
   var exceptionHandler
-  var config
+  var configService
   var opbeatBackend
   var logger
   var transport
   beforeEach(function () {
     var serviceFactory = new ServiceFactory()
-    config = Object.create(Config)
-    config.init()
-    serviceFactory.services['ConfigService'] = config
+    configService = serviceFactory.getConfigService()
     transport = serviceFactory.services['Transport'] = new TransportMock()
 
     exceptionHandler = serviceFactory.getExceptionHandler()
@@ -21,8 +18,8 @@ describe('ExceptionHandler', function () {
   })
   it('should process errors', function (done) {
     // in IE 10, Errors are given a stack once they're thrown.
-    config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
-    expect(config.isValid()).toBe(true)
+    configService.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    expect(configService.isValid()).toBe(true)
     spyOn(logger, 'warn').and.callThrough()
     try {
       throw new Error('unittest error')
@@ -54,7 +51,7 @@ describe('ExceptionHandler', function () {
 
   it('should handle edge cases', function (done) {
     // todo: make this test more specific
-    config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    configService.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
     spyOn(logger, 'warn')
     var resultPromises = []
     resultPromises.push(exceptionHandler.processError())
@@ -69,8 +66,8 @@ describe('ExceptionHandler', function () {
   })
 
   it('should capture extra data', function (done) {
-    config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
-    expect(config.isValid()).toBe(true)
+    configService.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    expect(configService.isValid()).toBe(true)
     try {
       throw new Error('unittest error')
     } catch (error) {
@@ -129,7 +126,7 @@ describe('ExceptionHandler', function () {
   })
 
   it('should install onerror and accept ErrorEvents', function (done) {
-    config.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
+    configService.setConfig({ appId: 'test', orgId: 'test', isInstalled: true })
     var _onError = window.onerror
     window.onerror = null
     exceptionHandler.install()

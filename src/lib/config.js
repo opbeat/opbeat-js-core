@@ -134,4 +134,4 @@ Config.prototype.isPlatformSupported = function () {
     utils.isCORSSupported()
 }
 
-module.exports = new Config()
+module.exports = Config

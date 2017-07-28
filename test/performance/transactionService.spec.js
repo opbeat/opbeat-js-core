@@ -17,7 +17,7 @@ describe('TransactionService', function () {
     spyOn(zoneServiceMock, 'get').and.callThrough()
     spyOn(logger, 'debug')
 
-    config = Object.create(Config)
+    config = new Config()
     config.init()
     transactionService = new TransactionService(zoneServiceMock, logger, config)
   })

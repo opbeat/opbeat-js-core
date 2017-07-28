@@ -1,4 +1,3 @@
-var Config = require('../../src/lib/config')
 var OpbeatBackend = require('../../src/backend/opbeat_backend')
 
 var Transaction = require('../../src/performance/transaction')
@@ -14,9 +13,7 @@ describe('OpbeatBackend', function () {
   var logger
   beforeEach(function () {
     serviceFactory = new ServiceFactory()
-    config = Object.create(Config)
-    config.init()
-    serviceFactory.services['ConfigService'] = config
+    config = serviceFactory.getConfigService()
 
     logger = serviceFactory.getLogger()
 
@@ -57,7 +54,6 @@ describe('OpbeatBackend', function () {
     expect(config.isValid()).toBe(true)
 
     var tr = new Transaction('transaction', 'transaction', { 'performance.enableStackFrames': true })
-
 
     tr.doneCallback = function () {
       opbeatBackend.sendTransactions([tr])

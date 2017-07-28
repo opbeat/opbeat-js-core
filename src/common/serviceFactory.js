@@ -53,8 +53,9 @@ ServiceFactory.prototype.getLogger = function () {
 
 ServiceFactory.prototype.getConfigService = function () {
   if (utils.isUndefined(this.services['ConfigService'])) {
-    Config.init()
-    this.services['ConfigService'] = Config
+    var configService = new Config()
+    configService.init()
+    this.services['ConfigService'] = configService
   }
   return this.services['ConfigService']
 }

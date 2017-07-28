@@ -3,7 +3,7 @@ var Config = require('../../src/lib/config')
 describe('config', function () {
   var config
   beforeEach(function () {
-    config = Object.create(Config)
+    config = new Config()
     config.init()
   })
   it('should merge configs with already set configs', function () {
