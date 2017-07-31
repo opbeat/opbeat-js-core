@@ -9,5 +9,3 @@ module.exports['Subscription'] = require('./common/subscription')
 module.exports['patchUtils'] = require('./common/patchUtils')
 module.exports['patchCommon'] = require('./common/patchCommon')
 module.exports['utils'] = require('./lib/utils')
-
-module.exports['addFilter'] = require('./lib/filtering').addFilter

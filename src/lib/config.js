@@ -33,6 +33,24 @@ function Config () {
   }
 
   this._changeSubscription = new Subscription()
+  this.filters = []
+}
+
+Config.prototype.addFilter = function addFilter (cb) {
+  if (typeof cb !== 'function') {
+    throw new Error('Argument to must be function')
+  }
+  this.filters.push(cb)
+}
+
+Config.prototype.applyFilters = function applyFilters (data) {
+  for (var i = 0; i < this.filters.length; i++) {
+    data = this.filters[i](data)
+    if (!data) {
+      return
+    }
+  }
+  return data
 }
 
 Config.prototype.init = function () {

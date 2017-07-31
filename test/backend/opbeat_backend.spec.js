@@ -366,4 +366,64 @@ describe('OpbeatBackend', function () {
         done()
       })
   })
+
+  it('should discard error if filter returns falsy', function (done) {
+    config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
+    expect(transportMock.sendError).not.toHaveBeenCalled()
+
+    var filterSpy = jasmine.createSpy('filterFn').and.callFake(function (error) {})
+    config.addFilter(filterSpy)
+    var exceptionHandler = serviceFactory.getExceptionHandler()
+    // in IE 10, Errors are given a stack once they're thrown.
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      var promise = exceptionHandler.getExceptionData(error)
+        .then(function (data) {
+          return opbeatBackend.sendError(data)
+        })
+    }
+
+    promise.then(function () {
+      expect(transportMock.sendError).not.toHaveBeenCalled()
+      expect(filterSpy).toHaveBeenCalled()
+      done()
+    })
+  })
+
+  it('should apply the filters', function (done) {
+    config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
+    expect(transportMock.sendError).not.toHaveBeenCalled()
+
+    var callBackData
+    var filterSpy = jasmine.createSpy('filterFn').and
+      .callFake(function (error) {
+        callBackData = error
+        return error
+      })
+    filterSpy = function (error) {
+      error.extra.test = 'passed'
+      callBackData = error
+
+      return error
+    }
+    config.addFilter(filterSpy)
+    var exceptionHandler = serviceFactory.getExceptionHandler()
+    // in IE 10, Errors are given a stack once they're thrown.
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      var promise = exceptionHandler.getExceptionData(error)
+        .then(function (data) {
+          return opbeatBackend.sendError(data)
+        })
+    }
+
+    promise.then(function () {
+      expect(callBackData).toBeDefined()
+      expect(callBackData.extra.test).toBe('passed')
+      expect(transportMock.sendError).toHaveBeenCalled()
+      done()
+    })
+  })
 })

@@ -25,7 +25,13 @@ OpbeatBackend.prototype.sendError = function (errorData) {
     }
 
     var headers = this.getHeaders()
-    this._transport.sendError(errorData, headers)
+
+    errorData = this._config.applyFilters(errorData)
+    if (!errorData) {
+      this._logger.debug('opbeat.transport.sendToOpbeat.cancelled')
+    } else {
+      this._transport.sendError(errorData, headers)
+    }
   } else {
     this._logger.debug('Config is not valid')
   }

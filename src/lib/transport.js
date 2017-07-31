@@ -1,15 +1,8 @@
 var logger = require('./logger')
 var config = require('./config')
 
-var applyFilters = require('./filtering').applyFilters
-
 module.exports = {
   sendError: function (data, headers) {
-    data = applyFilters(data)
-    if (!data) {
-      logger.log('opbeat.transport.sendToOpbeat.cancelled')
-    }
-
     return _sendToOpbeat('errors', data, headers)
   },
 
