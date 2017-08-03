@@ -7,6 +7,7 @@ function Config () {
     opbeatAgentName: 'opbeat-js',
     VERSION: '%%VERSION%%',
     apiOrigin: 'https://intake.opbeat.com',
+    apiUrlPrefix: '/api/v1',
     isInstalled: false,
     debug: false,
     logLevel: 'warn',
@@ -62,6 +63,11 @@ Config.prototype.get = function (key) {
   return utils.arrayReduce(key.split('.'), function (obj, i) {
     return obj && obj[i]
   }, this.config)
+}
+
+Config.prototype.getEndpointUrl = function getEndpointUrl (endpoint) {
+  var url = this.get('apiOrigin') + this.get('apiUrlPrefix') + '/organizations/' + this.get('orgId') + '/apps/' + this.get('appId') + '/client-side/' + endpoint + '/'
+  return url
 }
 
 Config.prototype.set = function (key, value) {

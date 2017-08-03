@@ -1,26 +1,30 @@
-var logger = require('./logger')
-var config = require('./config')
-
-module.exports = {
-  sendError: function (data, headers) {
-    return _sendToOpbeat('errors', data, headers)
-  },
-
-  sendTransaction: function (data, headers) {
-    return _sendToOpbeat('transactions', data, headers)
-  },
-
-  getFile: function (fileUrl) {
-    return _makeRequest(fileUrl, 'GET', '', {})
-  }
+function Transport (configService, logger) {
+  this.configService = configService
+  this.logger = logger
 }
 
-function _sendToOpbeat (endpoint, data, headers) {
-  logger.log('opbeat.transport.sendToOpbeat', data)
+Transport.prototype.sendError = function sendError (data, headers) {
+  return this._sendToOpbeat('errors', data, headers)
+}
 
-  var url = config.get('apiOrigin') + '/api/v1/organizations/' + config.get('orgId') + '/apps/' + config.get('appId') + '/client-side/' + endpoint + '/'
+Transport.prototype.sendTransaction = function sendTransaction (data, headers) {
+  return this._sendToOpbeat('transactions', data, headers)
+}
+
+Transport.prototype._sendToOpbeat = function _sendToOpbeat (endpoint, data, headers) {
+  var self = this
+  this.logger.debug('opbeat.transport.sendToOpbeat', data)
+
+  var url = this.configService.getEndpointUrl(endpoint)
 
   return _makeRequest(url, 'POST', 'JSON', data, headers)
+    .then(function (response) {
+      self.logger.debug('opbeat.transport.makeRequest.success')
+      return response
+    }, function (reason) {
+      self.logger.debug('opbeat.transport.makeRequest.error', reason)
+      return Promise.reject(reason)
+    })
 }
 
 function _makeRequest (url, method, type, data, headers) {
@@ -50,17 +54,14 @@ function _makeRequest (url, method, type, data, headers) {
           var err = new Error(url + ' HTTP status: ' + status)
           err.xhr = xhr
           reject(err)
-          logger.log('opbeat.transport.makeRequest.error', err)
         } else {
           resolve(xhr.responseText)
-          logger.log('opbeat.transport.makeRequest.success')
         }
       }
     }
 
     xhr.onerror = function (err) {
       reject(err)
-      logger.log('opbeat.transport.makeRequest.error', err)
     }
 
     if (type === 'JSON') {
@@ -70,3 +71,5 @@ function _makeRequest (url, method, type, data, headers) {
     xhr.send(data)
   })
 }
+
+module.exports = Transport

@@ -30,7 +30,7 @@ OpbeatBackend.prototype.sendError = function (errorData) {
     if (!errorData) {
       this._logger.debug('opbeat.transport.sendToOpbeat.cancelled')
     } else {
-      this._transport.sendError(errorData, headers)
+      return this._transport.sendError(errorData, headers)
     }
   } else {
     this._logger.debug('Config is not valid')

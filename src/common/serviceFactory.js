@@ -3,7 +3,7 @@ var Logger = require('loglevel')
 var Config = require('../lib/config')
 
 var utils = require('../lib/utils')
-var transport = require('../lib/transport')
+var Transport = require('../lib/transport')
 var ExceptionHandler = require('../exceptions/exceptionHandler')
 var StackFrameService = require('../exceptions/stackFrameService')
 
@@ -25,7 +25,9 @@ ServiceFactory.prototype.getOpbeatBackend = function () {
 
 ServiceFactory.prototype.getTransport = function () {
   if (utils.isUndefined(this.services['Transport'])) {
-    this.services['Transport'] = transport
+    var configService = this.getConfigService()
+    var logger = this.getLogger()
+    this.services['Transport'] = new Transport(configService, logger)
   }
   return this.services['Transport']
 }

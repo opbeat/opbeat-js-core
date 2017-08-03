@@ -5,6 +5,9 @@ var ServiceFactory = require('../../src/common/serviceFactory')
 
 var TransportMock = require('../utils/transportMock')
 
+var e2eAccountAppId = '6664ca4dfc'
+var e2eAccountOrgId = '7f9fa667d0a349dd8377bc740bcfc33e'
+
 describe('OpbeatBackend', function () {
   var config
   var transportMock
@@ -425,5 +428,73 @@ describe('OpbeatBackend', function () {
       expect(transportMock.sendError).toHaveBeenCalled()
       done()
     })
+  })
+
+  it('should send actual error data to opbeat intake', function (done) {
+    serviceFactory = new ServiceFactory()
+    config = serviceFactory.getConfigService()
+    config.setConfig({appId: e2eAccountAppId, orgId: e2eAccountOrgId, isInstalled: true})
+    opbeatBackend = serviceFactory.getOpbeatBackend()
+    var exceptionHandler = serviceFactory.getExceptionHandler()
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      var promise = exceptionHandler.getExceptionData(error)
+        .then(function (data) {
+          return opbeatBackend.sendError(data)
+        })
+    }
+    promise.then(function (response) {
+      var respObj = JSON.parse(response)
+      expect(respObj.status).toBe(202)
+      done()
+    }, function (reason) {
+      fail(reason)
+    })
+  })
+
+  it('should send actual transaction data to opbeat intake', function (done) {
+    serviceFactory = new ServiceFactory()
+    config = serviceFactory.getConfigService()
+    config.setConfig({appId: e2eAccountAppId, orgId: e2eAccountOrgId, isInstalled: true})
+    opbeatBackend = serviceFactory.getOpbeatBackend()
+    var tr = new Transaction('transaction', 'transaction', { 'performance.enableStackFrames': true })
+
+    tr.doneCallback = function () {
+      opbeatBackend.sendTransactions([tr])
+        .then(function (response) {
+          var respObj = JSON.parse(response)
+          expect(respObj.status).toBe(202)
+          done()
+        }, function (reason) {
+          fail(reason)
+        })
+    }
+    tr.startTrace('trace', 'trace').end()
+    tr.end()
+  })
+
+  it('should handle if appId and/or orgId are incorrect', function (done) {
+    serviceFactory = new ServiceFactory()
+    config = serviceFactory.getConfigService()
+    config.setConfig({appId: 'test', orgId: 'test', isInstalled: true})
+    opbeatBackend = serviceFactory.getOpbeatBackend()
+    var exceptionHandler = serviceFactory.getExceptionHandler()
+    try {
+      throw new Error('unittest error')
+    } catch (error) {
+      var promise = exceptionHandler.getExceptionData(error)
+        .then(function (data) {
+          return opbeatBackend.sendError(data)
+        })
+    }
+
+    promise
+      .then(function (response) {
+        fail('expected the request to fail')
+      }, function (error) {
+        expect(error.message).toContain('HTTP status: 401')
+        done()
+      })
   })
 })
