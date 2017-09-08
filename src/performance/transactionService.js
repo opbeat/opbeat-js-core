@@ -326,7 +326,12 @@ TransactionService.prototype.scheduleTransactionSend = function () {
     }
     logger.debug('Sending Transactions to opbeat.', transactions.length)
     // todo: if transactions are already being sent, should check
-    opbeatBackend.sendTransactions(transactions)
+    var promise = opbeatBackend.sendTransactions(transactions)
+    if (promise) {
+      promise.then(undefined, function () {
+        logger.debug('Failed sending transactions!')
+      })
+    }
     self.clearTransactions()
   }, 5000)
 }
